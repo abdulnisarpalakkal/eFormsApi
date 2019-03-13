@@ -36,6 +36,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 	@Autowired
 	private BCryptPasswordEncoder bcryptEncoder;
 
+	@Override
 	public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
 		User user = userDao.findByUsername(userId);
 		if(user == null){
