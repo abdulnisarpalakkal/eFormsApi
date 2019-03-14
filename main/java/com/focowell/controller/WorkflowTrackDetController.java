@@ -38,6 +38,11 @@ public class WorkflowTrackDetController {
     public List<WorkflowTrackDet> list(){
         return workflowTrackDetService.findAll();
     }
+    @RequestMapping(value="/workflowTrackDets/user", method = RequestMethod.GET)
+    public List<WorkflowTrackDet> listByUser(){
+    	
+        return workflowTrackDetService.findAllByUser();
+    }
 
     @RequestMapping(value = "/workflowTrackDets/{id}", method = RequestMethod.GET)
     public WorkflowTrackDet getOne(@PathVariable(value = "id") Long id){

@@ -3,7 +3,10 @@ package com.focowell.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.focowell.config.error.AlreadyExistsException;
@@ -11,6 +14,7 @@ import com.focowell.dao.WorkflowTrackDetDao;
 import com.focowell.dao.UserDao;
 import com.focowell.model.WorkflowTrackDet;
 import com.focowell.model.User;
+import com.focowell.service.UserService;
 import com.focowell.service.WorkflowTrackDetService;
 
 @Service(value = "workflowTrackDetService")
@@ -18,6 +22,9 @@ public class WorkflowTrackDetServiceImpl implements WorkflowTrackDetService {
 
 	@Autowired
 	private WorkflowTrackDetDao workflowTrackDetDao;
+	
+	@Autowired
+	private UserService userService;
 	
 	@Override
 	public List<WorkflowTrackDet> findAll() {
@@ -32,6 +39,18 @@ public class WorkflowTrackDetServiceImpl implements WorkflowTrackDetService {
 		return list;
 	}
 
+	@Override
+	public List<WorkflowTrackDet> findAllByUser() {
+		List<WorkflowTrackDet> list = new ArrayList<>();
+		Authentication auth=SecurityContextHolder.getContext().getAuthentication();
+		User user=userService.findOne(auth.getName());
+		workflowTrackDetDao.findAllByUserJPQL(user.getId()).iterator().forEachRemaining(list::add);
+		list.forEach(track->{
+			Hibernate.initialize(track.getWorkflowTrackMaster().getWorkflowMaster());
+		});
+		return list;
+	}
+	
 	@Override
 	public void delete(long id) {
 		workflowTrackDetDao.deleteById(id);

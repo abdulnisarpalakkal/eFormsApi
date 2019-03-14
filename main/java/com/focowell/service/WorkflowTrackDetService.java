@@ -8,7 +8,7 @@ import com.focowell.model.WorkflowTrackDet;
 public interface WorkflowTrackDetService {
 	    List<WorkflowTrackDet> findAll();
 	    List<WorkflowTrackDet> findAllByOpen(boolean open);
-	    
+	    List<WorkflowTrackDet> findAllByUser();
 	    void delete(long id);
 	    WorkflowTrackDet findOne(String workflowTrackDetName);
 
@@ -16,6 +16,7 @@ public interface WorkflowTrackDetService {
 	    WorkflowTrackDet save(WorkflowTrackDet workflowTrackDet) ;
 	    WorkflowTrackDet update(WorkflowTrackDet workflowTrackDet);
 		WorkflowTrackDet updateOpenStatus(WorkflowTrackDet workflowTrackDet);
+		
 		
 		
 }
