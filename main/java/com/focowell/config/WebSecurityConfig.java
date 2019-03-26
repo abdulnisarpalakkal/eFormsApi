@@ -47,20 +47,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.cors().and().csrf().disable().
-                authorizeRequests()
-                .antMatchers("/token/*").permitAll()
-                .antMatchers("/user/*").hasAnyRole("ADMIN")
-                .antMatchers("/process/*").hasAnyRole("ADMIN")
+    	http.cors().and().csrf().disable().
+        authorizeRequests()
+        .antMatchers("/token/*").permitAll()
+        .antMatchers("/user/*").hasAnyRole("ADMIN")
+        .antMatchers("/process/*").hasAnyRole("ADMIN")
 
 
-                
-                .anyRequest().authenticated()
-                .and()
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http
-                .addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+        
+        .anyRequest().authenticated()
+        .and()
+        .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+http
+        .addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Bean
