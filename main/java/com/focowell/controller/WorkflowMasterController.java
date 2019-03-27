@@ -44,6 +44,11 @@ public class WorkflowMasterController {
         return workflowMasterService.findAll();
     }
 
+    @RequestMapping(value="/workflows/process/{processId}", method = RequestMethod.GET)
+    public List<WorkflowMaster> listByProcess(@PathVariable(value = "processId") Long processId){
+        return workflowMasterService.findAllByProcess(processId);
+    }
+
     @RequestMapping(value="/workflows/published", method = RequestMethod.GET)
     public List<WorkflowMaster> listPublished(){
         return workflowMasterService.findAllPublished();

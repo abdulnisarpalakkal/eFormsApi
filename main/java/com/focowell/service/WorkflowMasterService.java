@@ -7,6 +7,7 @@ import com.focowell.model.WorkflowMaster;
 
 public interface WorkflowMasterService {
 	    List<WorkflowMaster> findAll();
+	    List<WorkflowMaster> findAllByProcess(long processId);
 	    void delete(long id);
 	    WorkflowMaster findOne(String workflowMasterName);
 

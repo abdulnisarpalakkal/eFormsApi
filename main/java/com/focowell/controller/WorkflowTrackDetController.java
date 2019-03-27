@@ -43,6 +43,11 @@ public class WorkflowTrackDetController {
     	
         return workflowTrackDetService.findAllByUser();
     }
+    @RequestMapping(value="/workflowTrackDets/process/{processId}", method = RequestMethod.GET)
+    public List<WorkflowTrackDet> listByProcess(@PathVariable(value = "processId") Long processId){
+    	
+        return workflowTrackDetService.findAllByProcess(processId);
+    }
 
     @RequestMapping(value = "/workflowTrackDets/{id}", method = RequestMethod.GET)
     public WorkflowTrackDet getOne(@PathVariable(value = "id") Long id){

@@ -2,7 +2,7 @@ package com.focowell.controller;
 
 import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.model.ProcessData;
-
+import com.focowell.model.dto.ProcessSubModulesDto;
 import com.focowell.service.ProcessService;
 import com.focowell.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +40,10 @@ public class ProcessController {
     @RequestMapping( method = RequestMethod.GET)
     public List<ProcessData> list(){
         return processService.findAll();
+    }
+    @RequestMapping(value="/submodules/{processId}", method = RequestMethod.GET)
+    public ProcessSubModulesDto listAllSubModules(@PathVariable(value = "processId") Long processId){
+        return processService.findAllSubModules(processId);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)

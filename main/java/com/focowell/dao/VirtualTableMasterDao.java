@@ -22,6 +22,9 @@ public interface VirtualTableMasterDao extends CrudRepository<VirtualTableMaster
 	@Query("SELECT v FROM VirtualTableMaster v left join fetch v.process p  where id=:id ")
 	Optional<VirtualTableMaster> findByIdJPQL(@Param("id") long id);
 	
+	@Query("SELECT v FROM VirtualTableMaster v left join fetch v.process p where p.id=:processId ")
+	Iterable<VirtualTableMaster> findAllByProcessJPQL(@Param("processId") long processId);
+	
 	Iterable<VirtualTableMaster> findAllByProcess_Id(long processId);
 	
 }

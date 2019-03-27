@@ -46,7 +46,12 @@ public class VirtualTableMasterServiceImpl implements VirtualTableMasterService 
 		virtualTableMasterDao.findAllByJPQL().iterator().forEachRemaining(list::add);
 		return list;
 	}
-
+	@Override
+	public List<VirtualTableMaster> findAllByProcessId(long processId) {
+		List<VirtualTableMaster> list = new ArrayList<>();
+		virtualTableMasterDao.findAllByProcessJPQL(processId).iterator().forEachRemaining(list::add);
+		return list;
+	}
 	@Override
 	public void delete(long id) {
 		virtualTableMasterDao.deleteById(id);

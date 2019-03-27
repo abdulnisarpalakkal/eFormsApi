@@ -9,6 +9,7 @@ import com.focowell.model.dto.VirtualTableFieldsConstraintDto;
 
 public interface VirtualTableMasterService {
 	    List<VirtualTableMaster> findAll();
+	    List<VirtualTableMaster> findAllByProcessId(long processId);
 	    void delete(long id);
 	    VirtualTableMaster findOne(String virtualTableMasterName);
 

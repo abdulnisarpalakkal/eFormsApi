@@ -18,6 +18,10 @@ public interface WorkflowTrackDetDao extends CrudRepository<WorkflowTrackDet, Lo
 			+ " left join fetch wt.workflowNode where u.id=:userId ")
 	List<WorkflowTrackDet> findAllByUserJPQL (@Param("userId") long userId);
 	
+	@Query("SELECT wt FROM WorkflowTrackDet wt inner join fetch wt.accessUser u inner join fetch wt.workflowTrackMaster wtm "
+			+ " inner join fetch wt.workflowNode inner join fetch wtm.workflowMaster wm inner join wm.process p where p.id=:processId ")
+	List<WorkflowTrackDet> findAllByProcessJPQL (@Param("processId") long processId);
+	
 //	@Query("SELECT a FROM WorkflowTrackDet  ")
 //	Iterable<WorkflowTrackDet> findAllByJPQL();
 }

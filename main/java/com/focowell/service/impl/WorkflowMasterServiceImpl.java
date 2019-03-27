@@ -46,6 +46,13 @@ public class WorkflowMasterServiceImpl implements WorkflowMasterService {
 		return list;
 	}
 	@Override
+	public List<WorkflowMaster> findAllByProcess(long processId) {
+		List<WorkflowMaster> list = new ArrayList<>();
+		workflowMasterDao.findAllByProcessJPQL(processId).iterator().forEachRemaining(list::add);
+		return list;
+	}
+	
+	@Override
 	public List<WorkflowMaster> findAllPublished() {
 		List<WorkflowMaster> list = new ArrayList<>();
 		workflowMasterDao.findAllPublishedByJPQL().iterator().forEachRemaining(list::add);

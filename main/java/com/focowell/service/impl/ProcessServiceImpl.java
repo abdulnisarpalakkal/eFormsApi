@@ -10,8 +10,11 @@ import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.dao.ProcessDao;
 import com.focowell.dao.ProcessDao;
 import com.focowell.model.ProcessData;
-
+import com.focowell.model.dto.ProcessSubModulesDto;
+import com.focowell.service.FormMasterService;
 import com.focowell.service.ProcessService;
+import com.focowell.service.VirtualTableMasterService;
+import com.focowell.service.WorkflowMasterService;
 import com.focowell.service.ProcessService;
 
 @Service(value = "processService")
@@ -20,13 +23,31 @@ public class ProcessServiceImpl implements ProcessService {
 	@Autowired
 	private ProcessDao processDao;
 	
+	@Autowired
+	private VirtualTableMasterService virtualTableService;
+	
+	@Autowired
+	private FormMasterService formService;
+	
+	@Autowired
+	private WorkflowMasterService workflowService;
+	
 	@Override
 	public List<ProcessData> findAll() {
 		List<ProcessData> list = new ArrayList<>();
 		processDao.findAllByJPQL().iterator().forEachRemaining(list::add);
 		return list;
 	}
-
+	@Override
+	public ProcessSubModulesDto findAllSubModules(long processId) {
+		ProcessSubModulesDto processSubModules=new ProcessSubModulesDto();
+		processSubModules.setVirtualTableMasters(virtualTableService.findAllByProcessId(processId));
+		processSubModules.setFormMasters(formService.findAllByProcess(processId));
+		processSubModules.setWorkflowMasters(workflowService.findAllByProcess(processId));
+		
+		return processSubModules;
+	}
+//	ProcessSubModulesDto
 	@Override
 	public void delete(long id) {
 		processDao.deleteById(id);

@@ -54,6 +54,11 @@ public class VirtualTableMasterController {
     public List<VirtualTableMaster> list(){
         return virtualTableMasterService.findAll();
     }
+   
+    @RequestMapping(value="/virtualTableMaster/process/{processId}", method = RequestMethod.GET)
+    public List<VirtualTableMaster> listByProcess(@PathVariable(value = "processId") Long processId){
+        return virtualTableMasterService.findAllByProcessId(processId);
+    }
 
     @RequestMapping(value = "/virtualTableMaster/{id}", method = RequestMethod.GET)
     public VirtualTableMaster getOne(@PathVariable(value = "id") Long id){

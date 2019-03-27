@@ -50,6 +50,14 @@ public class WorkflowTrackDetServiceImpl implements WorkflowTrackDetService {
 		});
 		return list;
 	}
+	@Override
+	public List<WorkflowTrackDet> findAllByProcess(long processId) {
+		List<WorkflowTrackDet> list = new ArrayList<>();
+		
+		workflowTrackDetDao.findAllByProcessJPQL(processId).iterator().forEachRemaining(list::add);
+		return list;
+	}
+	
 	
 	@Override
 	public void delete(long id) {
