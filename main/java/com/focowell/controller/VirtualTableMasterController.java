@@ -5,9 +5,11 @@ import com.focowell.model.VirtualTableMaster;
 import com.focowell.model.dto.UserDto;
 import com.focowell.model.dto.VirtualTableFKConstraintRefDto;
 import com.focowell.model.dto.VirtualTableFieldsConstraintDto;
+import com.focowell.model.dto.VirtualTableRecordForGridDto;
 import com.focowell.model.User;
 import com.focowell.model.VirtualTableField;
 import com.focowell.service.VirtualTableMasterService;
+import com.focowell.service.VirtualTableRecordsService;
 import com.focowell.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 //@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
@@ -29,6 +32,8 @@ public class VirtualTableMasterController {
 
     @Autowired
     private VirtualTableMasterService virtualTableMasterService;
+    @Autowired
+    private VirtualTableRecordsService virtualTableRecordsService;
     
     @Autowired
     private UserService userService;
@@ -78,6 +83,10 @@ public class VirtualTableMasterController {
     @RequestMapping(value="/virtualTableMaster/constraintRef/{id}", method = RequestMethod.GET)
     public VirtualTableFKConstraintRefDto getConstraintRef(@PathVariable(value = "id") long processId)  {
     	return virtualTableMasterService.findVirtualTableConstraintRefData(processId);
+    }
+    @RequestMapping(value="/virtualTableMaster/records/{tableId}", method = RequestMethod.GET)
+    public VirtualTableRecordForGridDto listRecordsByTable(@PathVariable(value = "tableId") long tableId){
+        return virtualTableRecordsService.findAllByTableForGrid(tableId);
     }
     
 }
