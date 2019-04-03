@@ -33,7 +33,14 @@ public class VirtualTableFieldsServiceImpl implements VirtualTableFieldsService 
 		virtualTableFieldsDao.findAllByTableIdJPQL(tableId).iterator().forEachRemaining(list::add);
 		return list;
 	}
-	
+	@Override
+	public List<String> findAllFieldNamesByTableId(long tableId) {
+		List<String> list = new ArrayList<>();
+		virtualTableFieldsDao.findAllByTableIdJPQL(tableId).iterator().forEachRemaining(field->{
+			list.add(field.getFieldName());
+		});
+		return list;
+	}
 
 	@Override
 	public void delete(long id) {

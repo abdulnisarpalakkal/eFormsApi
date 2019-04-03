@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.focowell.config.error.AlreadyExistsException;
+import com.focowell.model.FormComponentRefValue;
 import com.focowell.model.VirtualTableRecords;
 import com.focowell.model.dto.VirtualTableRecordForGridDto;
 
@@ -21,4 +22,6 @@ public interface VirtualTableRecordsService {
 		Set<VirtualTableRecords> findAllByPk(long pkId);
 		List<Map> findAllByTable(long tableId);
 		VirtualTableRecordForGridDto findAllByTableForGrid(long tableId);
+		Set<FormComponentRefValue> findAllFormComponentRefValueByTableAndFields(long tableId, String key,
+				String value);
 }

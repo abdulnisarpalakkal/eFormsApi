@@ -1,5 +1,6 @@
 package com.focowell.model;
 
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -62,6 +63,7 @@ public class FormDesign {
 	@JsonIgnoreProperties(value="formDesignList",allowSetters=true)
 	@ManyToOne(fetch=FetchType.EAGER)  
 	private VirtualTableField virtualTableField;
+	
 
 	public long getId() {
 		return id;

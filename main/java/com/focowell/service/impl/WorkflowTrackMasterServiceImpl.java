@@ -22,11 +22,13 @@ import com.focowell.dao.WorkflowTrackMasterDao;
 import com.focowell.dao.WorkflowLinkDao;
 import com.focowell.dao.UserDao;
 import com.focowell.model.WorkflowTrackMaster;
+import com.focowell.model.FormComponentRefValue;
 import com.focowell.model.FormDesign;
 import com.focowell.model.FormMaster;
 import com.focowell.model.User;
 import com.focowell.model.UserRoles;
 import com.focowell.model.VirtualTableConstraintType;
+import com.focowell.model.VirtualTableConstraints;
 import com.focowell.model.VirtualTableField;
 import com.focowell.model.VirtualTableMaster;
 import com.focowell.model.VirtualTableRecords;
@@ -194,9 +196,14 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 									.getFieldName().equals(record.getVirtualTableFields().getFieldName()))
 									.map(VirtualTableRecords::getStringValue)
 									.map(Optional::ofNullable).findFirst().orElse(null);
-					design.setComponentValue(val.isPresent()?val. get():null);
+					design.setComponentValue(val!=null?(val.isPresent()?val. get():null):null);
+					
+					
 				});
 			}
+			formNode.getFormMaster().getFormDesignList().forEach(design->{
+				populateRefValuesIfForeignKey(design); //setting the reference values if it is a foreign key
+			});
 			Set<WorkflowNode> actionNodes=workflowLinks.stream()
 					.filter(w->w.getSourceNode().getNodeId()==formFinalNode.getNodeId() 
 					&& (w.getTargetNode().getNodeType()==WorkflowNodeType.ACTION || w.getTargetNode().getNodeType()==WorkflowNodeType.STOP))
@@ -350,6 +357,18 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 			}
 		}
 		return false;
+	}
+	private void populateRefValuesIfForeignKey(FormDesign formDesign) {
+		if(formDesign.getVirtualTableField().getFieldConstraintList()==null || formDesign.getVirtualTableField().getFieldConstraintList().isEmpty() )
+			return;
+		VirtualTableConstraints foreignConstraint=formDesign.getVirtualTableField().getFieldConstraintList()
+				.stream().filter(constraint->constraint.getConstraintType()==VirtualTableConstraintType.FOREIGN_KEY).findFirst().orElse(null);
+		if(foreignConstraint!=null) {
+			long tableId=foreignConstraint.getForeignConstraint().getVirtualTableField().getVirtualTableMaster().getId();
+			FormComponentRefValue compRefValue=formDesign.getComponentRefValues().stream().findFirst().get();
+			formDesign.setComponentRefValues(virtualTableRecordsService.findAllFormComponentRefValueByTableAndFields(tableId,compRefValue.getRefKey(),compRefValue.getRefValue()));
+			
+		}
 	}
 
 }

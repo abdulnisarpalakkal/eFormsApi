@@ -18,6 +18,7 @@ public interface VirtualTableFieldsService {
 	    VirtualTableField update(VirtualTableField virtualTableFields);
 	    List<VirtualTableFieldDataType> findAllVirtualTableFieldDataTypes();
 		List<VirtualTableField> findAllByTableId(long tableId);
+		List<String> findAllFieldNamesByTableId(long tableId);
 		
 		
 }

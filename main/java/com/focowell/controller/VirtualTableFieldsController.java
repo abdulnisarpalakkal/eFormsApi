@@ -46,6 +46,11 @@ public class VirtualTableFieldsController {
         return virtualTableFieldsService.findAllByTableId(id);
     }
     
+    @RequestMapping(value="/virtualTableFields/table/fieldNames/{id}", method = RequestMethod.GET)
+    public List<String> fieldNamesListByTable(@PathVariable(value = "id") Long id){
+        return virtualTableFieldsService.findAllFieldNamesByTableId(id);
+    }
+    
     @RequestMapping(value = "/virtualTableFields/{id}", method = RequestMethod.GET)
     public VirtualTableField getOne(@PathVariable(value = "id") Long id){
         return virtualTableFieldsService.findById(id);

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.dao.VirtualTableRecordsDao;
+import com.focowell.model.FormComponentRefValue;
 import com.focowell.model.VirtualTableField;
 import com.focowell.model.VirtualTableRecords;
 import com.focowell.model.dto.VirtualTableRecordForGridDto;
@@ -51,16 +52,46 @@ public class VirtualTableRecordsServiceImpl implements VirtualTableRecordsServic
 		List<VirtualTableRecords> list = new ArrayList<VirtualTableRecords>();
 		virtualTableRecordsDao.findAllByTableJPQL(tableId).iterator().forEachRemaining(list::add);
 		List<Map> dtoList=new ArrayList<>();
-		Map<String,String> map=new HashMap<>();
+		Map<String,String> map=null;
+		long prevPk=0;
 		for(VirtualTableRecords record:list) {
-			if(map.containsKey(record.getVirtualTableFields().getFieldName())) {
-				dtoList.add(map);
+			
+			if(prevPk!=record.getPkValue()) {
+				if(map!=null)
+					dtoList.add(map);
 				map=new HashMap<>();
+				prevPk=record.getPkValue();
 			}
 			map.put(record.getVirtualTableFields().getFieldName(),record.getStringValue());
 		}
+		if(map!=null)
+			dtoList.add(map);
 		return dtoList;
 	}
+	
+	@Override
+	public Set<FormComponentRefValue> findAllFormComponentRefValueByTableAndFields(long tableId,String key,String value) {
+		
+		List<VirtualTableRecords> list = new ArrayList<VirtualTableRecords>();
+		virtualTableRecordsDao.findAllByTableJPQL(tableId).iterator().forEachRemaining(list::add);
+		Set<FormComponentRefValue> refValueList=new HashSet<>();
+		FormComponentRefValue refValue=null;
+		long prevPk=0;
+		for(VirtualTableRecords record:list) {
+			if(prevPk!=record.getPkValue()) {
+				if(refValue!=null)
+					refValueList.add(refValue);
+				refValue=new FormComponentRefValue();
+				prevPk=record.getPkValue();
+			}
+			if(record.getVirtualTableFields().getFieldName().equals(key))
+					refValue.setRefKey(record.getStringValue()); 
+			else if(record.getVirtualTableFields().getFieldName().equals(value))
+				refValue.setRefValue(record.getStringValue());
+		}
+		return refValueList;
+	}
+	
 	@Override
 	public VirtualTableRecordForGridDto findAllByTableForGrid(long tableId) {
 		VirtualTableRecordForGridDto recordsForGrid=new VirtualTableRecordForGridDto();

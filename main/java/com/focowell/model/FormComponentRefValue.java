@@ -20,6 +20,9 @@ public class FormComponentRefValue {
     @SequenceGenerator(name = "form_component_ref_value_seq",allocationSize = 1, sequenceName = "db_component_ref_value_seq")
     private long id;
 	
+	@Column(name="REF_KEY")
+	private String refKey;
+	
 	@Column(name="REF_VALUE")
 	private String refValue;
 	
@@ -33,6 +36,14 @@ public class FormComponentRefValue {
 
 	public void setId(long id) {
 		this.id = id;
+	}
+
+	public String getRefKey() {
+		return refKey;
+	}
+
+	public void setRefKey(String refKey) {
+		this.refKey = refKey;
 	}
 
 	public String getRefValue() {

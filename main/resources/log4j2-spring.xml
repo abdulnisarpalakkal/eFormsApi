@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration monitorInterval="60">
     <Properties>
-        <Property name="log-path">applogs</Property>
+        <Property name="log-path">/opt/tomcat/logs/applogs</Property>
         <Property name="date-append">${date:yyyy-MM-dd} </Property>
     </Properties>
     <Appenders>
