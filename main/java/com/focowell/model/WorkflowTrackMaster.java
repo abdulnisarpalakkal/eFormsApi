@@ -24,6 +24,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name="workflow_track_master")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class WorkflowTrackMaster {
+	
+	public WorkflowTrackMaster() {
+		
+	}
+	public WorkflowTrackMaster(WorkflowMaster workflowMaster,User requestedUser,long dataId,Set<WorkflowTrackDet> workflowTrackDetList) {
+		this.workflowMaster=workflowMaster;
+		this.requestedUser=requestedUser;
+		this.dataId=dataId;
+		this.workflowTrackDetList=workflowTrackDetList;
+	}
 	@Id  
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator = "workflow_track_master_seq")
     @SequenceGenerator(name = "workflow_track_master_seq",allocationSize = 1, sequenceName = "DB_WF_TRACK_MASTER_SEQ")
