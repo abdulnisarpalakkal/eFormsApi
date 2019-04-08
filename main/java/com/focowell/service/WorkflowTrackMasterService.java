@@ -21,11 +21,11 @@ public interface WorkflowTrackMasterService {
 	    WorkflowTrackMaster update(WorkflowTrackMaster workflowTrackMaster);
 	   
 		WorkflowStage execute(WorkflowStage WorkflowStage);
-		WorkflowTrackDet submitAction(WorkflowStage WorkflowStage);
+		WorkflowTrackDet submitAction(WorkflowStage WorkflowStage) throws Exception;
 
 		List<WorkflowStage> findAllOpenWorkflowTracks();
 		boolean formIsAccessable(FormMaster form);
 		
-		long mergeVirtualRecords(FormMaster form, long pkValue);
+		long mergeVirtualRecords(FormMaster form, long pkValue) throws Exception;
 		
 }

@@ -19,9 +19,9 @@ public interface VirtualTableRecordsService {
 	    VirtualTableRecords save(VirtualTableRecords virtualTableRecords) throws AlreadyExistsException;
 	    VirtualTableRecords update(VirtualTableRecords virtualTableRecords);
 		List<VirtualTableRecords> saveAll(Set<VirtualTableRecords> virtualTableRecords);
-		Set<VirtualTableRecords> findAllByPk(long pkId);
 		List<Map> findAllByTable(long tableId);
 		VirtualTableRecordForGridDto findAllByTableForGrid(long tableId);
 		Set<FormComponentRefValue> findAllFormComponentRefValueByTableAndFields(long tableId, String key,
 				String value);
+		Set<VirtualTableRecords> findAllByTableAndPk(long tableId, long pkValue);
 }

@@ -15,6 +15,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity  
 @Table(name="form_component_ref_value")
 public class FormComponentRefValue {
+	
+	public FormComponentRefValue() {
+		
+	}
+	
+    public FormComponentRefValue(String refKey,String refValue) {
+    	
+    	this.refKey=refKey;
+    	this.refValue=refValue;
+		
+	}
+	
 	@Id  
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator = "form_component_ref_value_seq")
     @SequenceGenerator(name = "form_component_ref_value_seq",allocationSize = 1, sequenceName = "db_component_ref_value_seq")

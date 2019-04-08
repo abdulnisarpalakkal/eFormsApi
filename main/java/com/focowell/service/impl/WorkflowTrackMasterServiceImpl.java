@@ -127,13 +127,14 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 			WorkflowStage stage=new WorkflowStage();
 
 			final WorkflowLink firstLink=workflowLinkService.findStartNodeByWorkflow(workflow.getId());
-			
-			Hibernate.initialize(firstLink.getTargetNode());
-			stage.setFormNode(firstLink.getTargetNode());
-			stage.setWorkflowMaster(workflow);
-			
-			if(formIsAccessable(stage.getFormNode().getFormMaster())) //check whether this form is accessable for user
-				workflowStages.add(stage);
+			if(firstLink!=null) {
+				Hibernate.initialize(firstLink.getTargetNode());
+				stage.setFormNode(firstLink.getTargetNode());
+				stage.setWorkflowMaster(workflow);
+				
+				if(formIsAccessable(stage.getFormNode().getFormMaster())) //check whether this form is accessable for user
+					workflowStages.add(stage);
+			}
 		});
 	}
 	private void getAllOpenWorkflows(List<WorkflowStage> workflowStages) {
@@ -146,10 +147,12 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 			stage.setWorkflowMaster(track.getWorkflowTrackMaster().getWorkflowMaster());
 			
 			WorkflowLink link=workflowLinkService.findBySourceId(track.getWorkflowNode().getNodeId());
-			Hibernate.initialize(link.getTargetNode());
-			stage.setFormNode(link.getTargetNode());
-			if(formIsAccessable(stage.getFormNode().getFormMaster())) //check whether this form is accessable for user
-				workflowStages.add(stage);
+			if(link!=null) {
+				Hibernate.initialize(link.getTargetNode());
+				stage.setFormNode(link.getTargetNode());
+				if(formIsAccessable(stage.getFormNode().getFormMaster())) //check whether this form is accessable for user
+					workflowStages.add(stage);
+			}
 		});
 	}
 	
@@ -173,7 +176,7 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 
 			if(workflowStage.getWorkflowTrackDet()!=null ) {  //if it is not start form then fetch data that is submitted previously
 				formNode.getFormMaster().setVirtualTableRecords(
-						virtualTableRecordsService.findAllByPk(workflowStage.getWorkflowTrackDet().getWorkflowTrackMaster().getDataId()));
+						virtualTableRecordsService.findAllByTableAndPk(formNode.getFormMaster().getVirtualTableMaster().getId(),workflowStage.getWorkflowTrackDet().getWorkflowTrackMaster().getDataId()));
 				setValuesToForm(formNode.getFormMaster().getVirtualTableRecords(), formNode.getFormMaster().getFormDesignList());	 //setting form value if form is view
 			}
 			
@@ -242,7 +245,7 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 	}
 	@Override
 	@Transactional
-	public WorkflowTrackDet submitAction(WorkflowStage WorkflowStage) {
+	public WorkflowTrackDet submitAction(WorkflowStage WorkflowStage) throws Exception {
 		Authentication auth=SecurityContextHolder.getContext().getAuthentication();
 		User user=userService.findOne(auth.getName());
 		
@@ -292,47 +295,44 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 	}
 	
 	@Override
-	public long mergeVirtualRecords(FormMaster form,long pkValue ) {
+	public long mergeVirtualRecords(FormMaster form,long pkValue ) throws Exception {
 		
 		if(form.getFormDesignList()!=null && !form.getFormDesignList().isEmpty()) {
 			return 0;
 		}
 		
-		if(pkValue==0) {
+		if(pkValue==0) 
 			return saveVirtualRecords(form);
-		}
-		else {
-			return updateVirtualRecords(form,pkValue);
-		}
-		
-
-		
+	
+		return updateVirtualRecords(form,pkValue);
+			
 	}
 	
-	private long saveVirtualRecords(FormMaster form) {
+	private long saveVirtualRecords(FormMaster form) throws Exception {
 		
 		Set<VirtualTableRecords> virtualTableRecords=new HashSet<VirtualTableRecords>();
 		List<VirtualTableField> fields=	virtualTableFieldService.findAllByTableId(form.getVirtualTableMaster().getId());
 		
-		
-		long pkValue=virtualTableSequenceService.getNextSeqByName(form.getVirtualTableMaster().getTableName()+"_seq");
+		VirtualTableField pkField=fields.stream()
+				.filter(field->field.getFieldConstraintList()!=null && field.getFieldConstraintList().stream().filter(constraint->constraint.getConstraintType()==VirtualTableConstraintType.PRIMARY_KEY).findAny().isPresent())
+				.findFirst().orElse(null);  	//finding primary key field
+		long pkValue=0;
+		pkValue=getPkValueFromForm(form.getFormDesignList(),pkField.getFieldName());
+				
+		if(pkValue==0)
+			pkValue=virtualTableSequenceService.getNextSeqByName(form.getVirtualTableMaster().getTableName()+"_seq");
 		for (VirtualTableField virtualTableField : fields) {
 			
-			
-			boolean isPk=false;
 			VirtualTableRecords record=new VirtualTableRecords();
 			record.setVirtualTableFields(virtualTableField);
-			if(virtualTableField.getFieldConstraintList()!=null)
-				isPk=virtualTableField.getFieldConstraintList().stream()
-				.filter(con->con.getConstraintType() ==VirtualTableConstraintType.PRIMARY_KEY).findAny().isPresent();
-			if(isPk)
+			
+			if(pkField.getFieldName().equals(virtualTableField.getFieldName()))
+			{
 				record.setStringValue(Long.toString(pkValue));
+			}
 			else
 			{ 
-				FormDesign formDesign=form.getFormDesignList().stream()
-						.filter(design->design.getVirtualTableField().equals(virtualTableField)).findFirst().orElse(null);
-				if(formDesign!=null)
-					record.setStringValue(formDesign.getComponentValue());
+				record.setStringValue(getFieldValueFromFormComponent(form.getFormDesignList(),virtualTableField.getFieldName()));
 			}
 			record.setPkValue(pkValue);
 			virtualTableRecords.add(record);
@@ -343,19 +343,35 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 	private long updateVirtualRecords(FormMaster form,long pkValue) {
 		Set<VirtualTableRecords> virtualTableRecords=null;
 		virtualTableRecords=new HashSet<VirtualTableRecords>();
-		virtualTableRecords=virtualTableRecordsService.findAllByPk(pkValue);
+		virtualTableRecords=virtualTableRecordsService.findAllByTableAndPk(form.getVirtualTableMaster().getId(),pkValue);
 		
 		
 		virtualTableRecords.forEach(record->{
-			Optional<FormDesign> formDesign=form.getFormDesignList().stream()
-					.filter(design->design.getVirtualTableField().getFieldName().equals(record.getVirtualTableFields().getFieldName())).findFirst();
-			if(formDesign.isPresent())
-				record.setStringValue(formDesign.get().getComponentValue());
+			record.setStringValue(getFieldValueFromFormComponent(form.getFormDesignList(),record.getVirtualTableFields().getFieldName()));
 		});
 		virtualTableRecordsService.saveAll(virtualTableRecords);
 		return pkValue;
 	}
-	
+	private long getPkValueFromForm(Set<FormDesign> formDesignList,String pkFieldName) throws Exception {
+		long pkValue=0;
+		try
+		{
+			String pkString=getFieldValueFromFormComponent(formDesignList,pkFieldName);
+			if(pkString!=null)
+				pkValue=Long.parseLong(pkString);
+		}
+		catch (NumberFormatException e) {
+			throw new Exception("Primary key value should be numeric");
+		}
+		return pkValue;
+	}
+	private String getFieldValueFromFormComponent(Set<FormDesign> formDesignList,String fieldName) {
+		Optional<FormDesign> formDesign=formDesignList.stream()
+				.filter(design->design.getVirtualTableField().getFieldName().equals(fieldName)).findFirst();
+		if(formDesign.isPresent())
+			return formDesign.get().getComponentValue();
+		return null;
+	}
 	@Override
 	public boolean formIsAccessable(FormMaster form) {
 		//check whether this form is accessable for user

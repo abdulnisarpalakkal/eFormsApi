@@ -38,10 +38,10 @@ public class VirtualTableRecordsServiceImpl implements VirtualTableRecordsServic
 	}
 	
 	@Override
-	public Set<VirtualTableRecords> findAllByPk(long pkId) {
+	public Set<VirtualTableRecords> findAllByTableAndPk(long tableId,long pkValue) {
 		
 		Set<VirtualTableRecords> set = new HashSet<VirtualTableRecords>();
-		virtualTableRecordsDao.findByPkValue(pkId).iterator().forEachRemaining(set::add);
+		virtualTableRecordsDao.findAllByTableAndPkValueJPQL(tableId, pkValue).iterator().forEachRemaining(set::add);
 		return set;
 	}
 
@@ -72,25 +72,39 @@ public class VirtualTableRecordsServiceImpl implements VirtualTableRecordsServic
 	@Override
 	public Set<FormComponentRefValue> findAllFormComponentRefValueByTableAndFields(long tableId,String key,String value) {
 		
-		List<VirtualTableRecords> list = new ArrayList<VirtualTableRecords>();
-		virtualTableRecordsDao.findAllByTableJPQL(tableId).iterator().forEachRemaining(list::add);
-		Set<FormComponentRefValue> refValueList=new HashSet<>();
-		FormComponentRefValue refValue=null;
-		long prevPk=0;
-		for(VirtualTableRecords record:list) {
-			if(prevPk!=record.getPkValue()) {
-				if(refValue!=null)
-					refValueList.add(refValue);
-				refValue=new FormComponentRefValue();
-				prevPk=record.getPkValue();
-			}
-			if(record.getVirtualTableFields().getFieldName().equals(key))
-					refValue.setRefKey(record.getStringValue()); 
-			else if(record.getVirtualTableFields().getFieldName().equals(value))
-				refValue.setRefValue(record.getStringValue());
-		}
+		List<Map> tableRecords=findAllByTable(tableId);
+		Set<FormComponentRefValue> refValueList=null;
+		if(tableRecords!=null)
+			refValueList=tableRecords.stream()
+			.filter(record->record.containsKey(key) && record.containsKey(value))
+			.map(record->new FormComponentRefValue(record.get(key).toString(),record.get(value).toString())).collect(Collectors.toSet());
+		
 		return refValueList;
 	}
+//	@Override
+//	public Set<FormComponentRefValue> findAllFormComponentRefValueByTableAndFields(long tableId,String key,String value) {
+//		
+//		List<VirtualTableRecords> list = new ArrayList<VirtualTableRecords>();
+//		virtualTableRecordsDao.findAllByTableJPQL(tableId).iterator().forEachRemaining(list::add);
+//		Set<FormComponentRefValue> refValueList=new HashSet<>();
+//		FormComponentRefValue refValue=null;
+//		long prevPk=0;
+//		for(VirtualTableRecords record:list) {
+//			if(prevPk!=record.getPkValue()) {
+//				if(refValue!=null)
+//					refValueList.add(refValue);
+//				refValue=new FormComponentRefValue();
+//				prevPk=record.getPkValue();
+//			}
+//			if(record.getVirtualTableFields().getFieldName().equals(key))
+//					refValue.setRefKey(record.getStringValue()); 
+//			else if(record.getVirtualTableFields().getFieldName().equals(value))
+//				refValue.setRefValue(record.getStringValue());
+//		}
+//		if(refValue!=null)
+//			refValueList.add(refValue);
+//		return refValueList;
+//	}
 	
 	@Override
 	public VirtualTableRecordForGridDto findAllByTableForGrid(long tableId) {
