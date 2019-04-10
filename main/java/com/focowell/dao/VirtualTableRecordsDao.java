@@ -2,6 +2,7 @@ package com.focowell.dao;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +16,7 @@ public interface VirtualTableRecordsDao extends CrudRepository<VirtualTableRecor
 	List<VirtualTableRecords> findByPkValue(long pkVlaue);
 	
 	@Query("SELECT record FROM VirtualTableRecords record inner join fetch record.virtualTableFields field inner join fetch field.virtualTableMaster table "
-			+ "  where table.id=:tableId order by record.pkValue ")
+			+ "  where table.id=:tableId order by record.pkValue,field.fieldName ")
 	List<VirtualTableRecords> findAllByTableJPQL(@Param("tableId") long tableId);
 	
 	@Query("SELECT record FROM VirtualTableRecords record inner join fetch record.virtualTableFields field inner join fetch field.virtualTableMaster table "

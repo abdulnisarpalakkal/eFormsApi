@@ -347,7 +347,9 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 		
 		
 		virtualTableRecords.forEach(record->{
-			record.setStringValue(getFieldValueFromFormComponent(form.getFormDesignList(),record.getVirtualTableFields().getFieldName()));
+			String val=getFieldValueFromFormComponent(form.getFormDesignList(),record.getVirtualTableFields().getFieldName());
+			if(val!=null)
+				record.setStringValue(val);
 		});
 		virtualTableRecordsService.saveAll(virtualTableRecords);
 		return pkValue;

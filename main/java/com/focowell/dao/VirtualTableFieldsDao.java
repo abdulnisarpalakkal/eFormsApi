@@ -21,7 +21,7 @@ public interface VirtualTableFieldsDao extends CrudRepository<VirtualTableField,
 	@Query("SELECT v FROM VirtualTableField v left join fetch v.virtualTableMaster ")
 	Iterable<VirtualTableField> findAllByJPQL();
 	
-	@Query("SELECT v FROM VirtualTableField v left join fetch v.virtualTableMaster  where v.virtualTableMaster.id=:id")
+	@Query("SELECT v FROM VirtualTableField v left join fetch v.virtualTableMaster  where v.virtualTableMaster.id=:id order by v.fieldName")
 	Iterable<VirtualTableField> findAllByTableIdJPQL(@Param("id") long id);
 	
 	@Query("SELECT v FROM VirtualTableField v left join fetch v.virtualTableMaster  where v.virtualTableMaster.id=:id")

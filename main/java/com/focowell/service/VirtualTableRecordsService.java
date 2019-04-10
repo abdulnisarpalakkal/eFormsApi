@@ -12,6 +12,7 @@ import com.focowell.model.dto.VirtualTableRecordForGridDto;
 public interface VirtualTableRecordsService {
 	    List<VirtualTableRecords> findAll();
 	    void delete(long id);
+	    void deleteByPkAndTable(long tableId, long pkId);
 	    VirtualTableRecords 
 	    findOne(String virtualTableRecordsName);
 
@@ -24,4 +25,7 @@ public interface VirtualTableRecordsService {
 		Set<FormComponentRefValue> findAllFormComponentRefValueByTableAndFields(long tableId, String key,
 				String value);
 		Set<VirtualTableRecords> findAllByTableAndPk(long tableId, long pkValue);
+		List<Map> findAllRecordsByTable(long tableId);
+		List<VirtualTableRecords> saveOneRowRecordAfterCheckPkValue(List<VirtualTableRecords> records) throws Exception;
+		
 }

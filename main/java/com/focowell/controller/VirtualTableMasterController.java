@@ -2,6 +2,7 @@ package com.focowell.controller;
 
 import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.model.VirtualTableMaster;
+import com.focowell.model.VirtualTableRecords;
 import com.focowell.model.dto.UserDto;
 import com.focowell.model.dto.VirtualTableFKConstraintRefDto;
 import com.focowell.model.dto.VirtualTableFieldsConstraintDto;
@@ -88,5 +89,15 @@ public class VirtualTableMasterController {
     public VirtualTableRecordForGridDto listRecordsByTable(@PathVariable(value = "tableId") long tableId){
         return virtualTableRecordsService.findAllByTableForGrid(tableId);
     }
+    @RequestMapping(value="/virtualTableMaster/records", method = RequestMethod.POST)
+    public List<VirtualTableRecords> addOneRowRecordAfterCheckPkValue(@RequestBody List<VirtualTableRecords> records) throws Exception {
+        return virtualTableRecordsService.saveOneRowRecordAfterCheckPkValue(records);
+    }
+    
+    @RequestMapping(value="/virtualTableMaster/records/{tableId}/{pkValue}", method = RequestMethod.DELETE)
+    public void deleteRowRecords(@PathVariable(value = "tableId") Long tableId,@PathVariable(value = "pkValue") Long pkValue) throws Exception {
+        virtualTableRecordsService.deleteByPkAndTable(tableId,pkValue);
+    }
+    
     
 }
