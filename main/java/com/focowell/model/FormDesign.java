@@ -1,6 +1,5 @@
 package com.focowell.model;
 
-import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -12,6 +11,9 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
@@ -64,6 +66,12 @@ public class FormDesign {
 	@ManyToOne(fetch=FetchType.EAGER)  
 	private VirtualTableField virtualTableField;
 	
+	@JsonIgnoreProperties(value={"formDesigns","formMaster"},allowSetters=true)
+	@ManyToMany(fetch=FetchType.EAGER,cascade=CascadeType.MERGE)
+	@JoinTable(name="form_design_rules",
+			joinColumns= {@JoinColumn(name="form_design_id")},
+			inverseJoinColumns= {@JoinColumn(name="form_rule_id")})
+	private Set<FormRule> formRules;
 
 	public long getId() {
 		return id;
@@ -145,6 +153,14 @@ public class FormDesign {
 
 	public void setComponentRefValues(Set<FormComponentRefValue> componentRefValues) {
 		this.componentRefValues = componentRefValues;
+	}
+
+	public Set<FormRule> getFormRules() {
+		return formRules;
+	}
+
+	public void setFormRules(Set<FormRule> formRules) {
+		this.formRules = formRules;
 	}
 
 	

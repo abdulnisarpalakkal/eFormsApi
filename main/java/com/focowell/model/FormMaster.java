@@ -21,6 +21,7 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -75,10 +76,17 @@ public class FormMaster {
 	@OneToMany(mappedBy="formMaster",fetch=FetchType.LAZY)  
 	private Set<WorkflowNode> workflowNodeList;
 	
+//	@JsonIgnoreProperties(value="formMaster",allowSetters=true) 
+	@JsonIgnore
+	@OneToMany(mappedBy="formMaster",fetch=FetchType.LAZY,cascade=CascadeType.ALL,orphanRemoval=true)  
+	private Set<FormRule> formRules;
+	
 	@Transient
 	@JsonSerialize
 	@JsonDeserialize 
 	private Set<VirtualTableRecords> VirtualTableRecords;
+	
+	
 
 	public long getId() {
 		return id;
@@ -160,6 +168,15 @@ public class FormMaster {
 		VirtualTableRecords = virtualTableRecords;
 	}
 
+	public Set<FormRule> getFormRules() {
+		return formRules;
+	}
+
+	public void setFormRules(Set<FormRule> formRules) {
+		this.formRules = formRules;
+	}
+
+	
 	
 	
 	

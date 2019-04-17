@@ -6,6 +6,7 @@ import java.util.Set;
 import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.model.FormDesign;
 import com.focowell.model.FormMaster;
+import com.focowell.model.dto.FormDesignDto;
 
 public interface FormMasterService {
 	    List<FormMaster> findAll();
@@ -16,5 +17,5 @@ public interface FormMasterService {
 	    FormMaster findById(Long id);
 	    FormMaster save(FormMaster formMaster) throws AlreadyExistsException;
 	    FormMaster update(FormMaster formMaster) throws AlreadyExistsException;
-		FormMaster updateDesign( Set<FormDesign> formDesigns);
+		boolean updateDesign(FormDesignDto formDesignDto);
 }

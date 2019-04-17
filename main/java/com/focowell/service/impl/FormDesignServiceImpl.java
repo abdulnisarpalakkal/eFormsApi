@@ -2,16 +2,23 @@ package com.focowell.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.dao.FormDesignDao;
+import com.focowell.dao.FormRuleDao;
 import com.focowell.model.FormComponentType;
 import com.focowell.model.FormDesign;
+import com.focowell.model.FormRule;
+import com.focowell.model.dto.FormDesignDto;
 import com.focowell.service.FormDesignService;
+import com.focowell.service.FormRuleService;
+import com.focowell.service.FormRuleTypeService;
 import com.focowell.service.VirtualTableFieldsService;
 
 @Service(value = "formDesignService")
@@ -22,6 +29,14 @@ public class FormDesignServiceImpl implements FormDesignService {
 	
 	@Autowired
     private VirtualTableFieldsService virtualTableFieldsService;
+    
+    @Autowired
+    private FormRuleService formRuleService;
+    
+    @Autowired
+    private FormRuleTypeService formRuleTypeService;
+	
+	
 	
 	@Override
 	public List<FormDesign> findAll() {
@@ -29,12 +44,22 @@ public class FormDesignServiceImpl implements FormDesignService {
 		formDesignDao.findAllByJPQL().iterator().forEachRemaining(list::add);
 		return list;
 	}
+	@Override
+	public List<FormDesign> findAllFormComponentsByFormId(Long formId) {
+		List<FormDesign> designList = new ArrayList<>();
+		
+		formDesignDao.findAllByFormIdJPQL(formId).iterator().forEachRemaining(designList::add);
+		return designList;
+	}
 	
 	@Override
-	public List<FormDesign> findAllByFormId(Long tableId) {
-		List<FormDesign> list = new ArrayList<>();
-		formDesignDao.findAllByFormIdJPQL(tableId).iterator().forEachRemaining(list::add);
-		return list;
+	public FormDesignDto findAllByFormId(Long formId) {
+		FormDesignDto formDesignDto=new FormDesignDto();
+		
+		formDesignDto.setFormDesigns(findAllFormComponentsByFormId(formId));
+		formDesignDto.setFormRules(formRuleService.findByFormId(formId));
+		formDesignDto.setFormRuleTypes(formRuleTypeService.findAll());
+		return formDesignDto;
 	}
 
 	@Override

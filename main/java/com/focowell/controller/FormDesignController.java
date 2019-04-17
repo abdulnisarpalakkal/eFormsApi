@@ -15,6 +15,7 @@ import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.model.FormComponentType;
 import com.focowell.model.FormDesign;
 import com.focowell.model.VirtualTableFieldDataType;
+import com.focowell.model.dto.FormDesignDto;
 import com.focowell.service.UserService;
 import com.focowell.service.FormDesignService;
 
@@ -46,8 +47,12 @@ public class FormDesignController {
         return formDesignService.findAll();
     }
     @RequestMapping(value="/formDesign/form/{formId}", method = RequestMethod.GET)
-    public List<FormDesign> listByFormId(@PathVariable(value = "formId") Long formId){
+    public FormDesignDto listByFormId(@PathVariable(value = "formId") Long formId){
         return formDesignService.findAllByFormId(formId);
+    }
+    @RequestMapping(value="/formDesign/components/form/{formId}", method = RequestMethod.GET)
+    public List<FormDesign> listComponentsByFormId(@PathVariable(value = "formId") Long formId){
+        return formDesignService.findAllFormComponentsByFormId(formId);
     }
     @RequestMapping(value = "/formDesign/{id}", method = RequestMethod.GET)
     public FormDesign getOne(@PathVariable(value = "id") Long id){

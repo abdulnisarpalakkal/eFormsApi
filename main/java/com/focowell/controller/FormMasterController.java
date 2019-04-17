@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.model.FormDesign;
 import com.focowell.model.FormMaster;
+import com.focowell.model.dto.FormDesignDto;
 import com.focowell.service.UserService;
 import com.focowell.service.FormMasterService;
 
@@ -60,8 +61,8 @@ public class FormMasterController {
     	return formMasterService.update(formMaster);
     }
     @RequestMapping(value="/formMaster/design", method = RequestMethod.PUT)
-    public FormMaster updateDesign(@RequestBody Set<FormDesign> formDesigns)  {
-    	return formMasterService.updateDesign(formDesigns);
+    public boolean updateDesign(@RequestBody FormDesignDto formDesignDto)  {
+    	return formMasterService.updateDesign(formDesignDto);
     }
     
 }

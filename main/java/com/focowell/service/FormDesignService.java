@@ -5,10 +5,11 @@ import java.util.List;
 import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.model.FormComponentType;
 import com.focowell.model.FormDesign;
+import com.focowell.model.dto.FormDesignDto;
 
 public interface FormDesignService {
 	    List<FormDesign> findAll();
-	    List<FormDesign> findAllByFormId(Long tableId);
+	    FormDesignDto findAllByFormId(Long tableId);
 	    void delete(long id);
 	    FormDesign findOne(String componentName);
 
@@ -17,4 +18,5 @@ public interface FormDesignService {
 	    List<FormDesign> saveAll(List<FormDesign> formDesigns) ;
 	    FormDesign update(FormDesign formDesign) throws AlreadyExistsException;
 		List<FormComponentType> findAllFormComponentTypes();
+		List<FormDesign> findAllFormComponentsByFormId(Long formId);
 }
