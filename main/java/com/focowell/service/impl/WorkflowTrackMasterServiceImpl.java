@@ -396,7 +396,12 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 		if(foreignConstraint!=null) {
 			long tableId=foreignConstraint.getForeignConstraint().getVirtualTableField().getVirtualTableMaster().getId();
 			FormComponentRefValue compRefValue=formDesign.getComponentRefValues().stream().findFirst().get();
-			formDesign.setComponentRefValues(virtualTableRecordsService.findAllFormComponentRefValueByTableAndFields(tableId,compRefValue.getRefKey(),compRefValue.getRefValue()));
+			formDesign.setComponentRefValues(
+					virtualTableRecordsService.findAllFormComponentRefValueByTableAndFields(
+							tableId,
+							foreignConstraint.getForeignConstraint().getVirtualTableField().getFieldName(), //reference key always will be the primary field of reference table
+							compRefValue.getRefValue()
+							));
 			
 		}
 	}
