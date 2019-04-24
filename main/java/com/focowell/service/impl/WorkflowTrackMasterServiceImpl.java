@@ -1,7 +1,6 @@
 package com.focowell.service.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -17,11 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.dao.WorkflowTrackMasterDao;
-import com.focowell.dao.WorkflowLinkDao;
-import com.focowell.dao.UserDao;
-import com.focowell.model.WorkflowTrackMaster;
 import com.focowell.model.FormComponentRefValue;
 import com.focowell.model.FormDesign;
 import com.focowell.model.FormMaster;
@@ -30,14 +25,14 @@ import com.focowell.model.UserRoles;
 import com.focowell.model.VirtualTableConstraintType;
 import com.focowell.model.VirtualTableConstraints;
 import com.focowell.model.VirtualTableField;
-import com.focowell.model.VirtualTableMaster;
 import com.focowell.model.VirtualTableRecords;
-import com.focowell.model.VirtualTableSequence;
 import com.focowell.model.WorkflowLink;
 import com.focowell.model.WorkflowNode;
 import com.focowell.model.WorkflowNodeType;
 import com.focowell.model.WorkflowStage;
 import com.focowell.model.WorkflowTrackDet;
+import com.focowell.model.WorkflowTrackMaster;
+import com.focowell.service.FormDesignService;
 import com.focowell.service.UserService;
 import com.focowell.service.VirtualTableFieldsService;
 import com.focowell.service.VirtualTableRecordsService;
@@ -73,6 +68,9 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 	
 	@Autowired
 	private WorkflowMasterService workflowMasterService;
+	
+	@Autowired
+	private FormDesignService formDesignService;
 	
 	@Override
 	public List<WorkflowTrackMaster> findAll() {
@@ -181,7 +179,7 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 			}
 			
 			formNode.getFormMaster().getFormDesignList().forEach(design->{
-				populateRefValuesIfForeignKey(design); //setting the reference values if it is a foreign key
+				formDesignService.populateRefValuesIfForeignKey(design); //setting the reference values if it is a foreign key
 			});
 			
 			Set<WorkflowNode> actionNodes=getAllActionNodesByForm(workflowLinks,formNode.getNodeId()); //get all action nodes under form
@@ -388,22 +386,6 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 		}
 		return false;
 	}
-	private void populateRefValuesIfForeignKey(FormDesign formDesign) {
-		if(formDesign.getVirtualTableField().getFieldConstraintList()==null || formDesign.getVirtualTableField().getFieldConstraintList().isEmpty() )
-			return;
-		VirtualTableConstraints foreignConstraint=formDesign.getVirtualTableField().getFieldConstraintList()
-				.stream().filter(constraint->constraint.getConstraintType()==VirtualTableConstraintType.FOREIGN_KEY).findFirst().orElse(null);
-		if(foreignConstraint!=null) {
-			long tableId=foreignConstraint.getForeignConstraint().getVirtualTableField().getVirtualTableMaster().getId();
-			FormComponentRefValue compRefValue=formDesign.getComponentRefValues().stream().findFirst().get();
-			formDesign.setComponentRefValues(
-					virtualTableRecordsService.findAllFormComponentRefValueByTableAndFields(
-							tableId,
-							foreignConstraint.getForeignConstraint().getVirtualTableField().getFieldName(), //reference key always will be the primary field of reference table
-							compRefValue.getRefValue()
-							));
-			
-		}
-	}
+	
 
 }

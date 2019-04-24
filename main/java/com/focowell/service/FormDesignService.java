@@ -19,4 +19,5 @@ public interface FormDesignService {
 	    FormDesign update(FormDesign formDesign) throws AlreadyExistsException;
 		List<FormComponentType> findAllFormComponentTypes();
 		List<FormDesign> findAllFormComponentsByFormId(Long formId);
+		void populateRefValuesIfForeignKey(FormDesign formDesign);
 }

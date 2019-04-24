@@ -27,6 +27,19 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name="form_design")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class FormDesign {
+	public FormDesign() {
+		
+	}
+	public FormDesign(String componentName, String componentLabel, FormComponentType componentType
+			,int alignOrder, VirtualTableField virtualTableField ) {
+		this.componentName=componentName;
+		this.componentLabel=componentLabel;
+		this.componentType=componentType;
+		this.alignOrder=alignOrder;
+		this.componentRefValues=componentRefValues;
+		this.virtualTableField=virtualTableField;
+		
+	}
 	@Id  
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator = "form_design_seq")
     @SequenceGenerator(name = "form_design_seq",allocationSize = 1, sequenceName = "DB_FORM_DESIGN_SEQ")

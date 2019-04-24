@@ -17,10 +17,14 @@ import org.springframework.stereotype.Service;
 import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.dao.VirtualTableRecordsDao;
 import com.focowell.model.FormComponentRefValue;
+import com.focowell.model.FormComponentType;
+import com.focowell.model.FormDesign;
 import com.focowell.model.VirtualTableConstraintType;
 import com.focowell.model.VirtualTableField;
+import com.focowell.model.VirtualTableFieldDataType;
 import com.focowell.model.VirtualTableRecords;
 import com.focowell.model.dto.VirtualTableRecordForGridDto;
+import com.focowell.service.FormDesignService;
 import com.focowell.service.VirtualTableFieldsService;
 import com.focowell.service.VirtualTableRecordsService;
 import com.focowell.service.VirtualTableSequenceService;
@@ -36,6 +40,9 @@ public class VirtualTableRecordsServiceImpl implements VirtualTableRecordsServic
 	
 	@Autowired
 	private VirtualTableSequenceService virtualTableSequenceService;
+	
+	@Autowired
+	private FormDesignService formDesignService;
 	
 	@Override
 	public List<VirtualTableRecords> findAll() {
@@ -110,13 +117,33 @@ public class VirtualTableRecordsServiceImpl implements VirtualTableRecordsServic
 		return refValueList;
 	}
 
-	
+	private List<FormDesign> getFormDesignFromTableFields(List<VirtualTableField> fields){
+		List<FormDesign> formDesigns=null;
+		
+		if(fields!=null) {
+			int index=0;
+			formDesigns=new ArrayList<>();
+			for(VirtualTableField field:fields){
+				FormDesign design=new FormDesign(field.getFieldName(),field.getFieldName(),FormComponentType.TEXT,index++,field);
+				if(field.getFieldDataType()==VirtualTableFieldDataType.DATE)
+					design.setComponentType(FormComponentType.DATE);
+				else
+					formDesignService.populateRefValuesIfForeignKey(design);
+				
+				formDesigns.add(design);
+			}
+		}
+		
+		return formDesigns;
+	}
+	 
 	@Override
 	public VirtualTableRecordForGridDto findAllByTableForGrid(long tableId) {
 		VirtualTableRecordForGridDto recordsForGrid=new VirtualTableRecordForGridDto();
 		recordsForGrid.setRecords(findAllRecordsByTable(tableId));
 		
 		recordsForGrid.setColumns(virtualTableFieldsService.findAllByTableId(tableId));
+		recordsForGrid.setFormDesigns(getFormDesignFromTableFields(recordsForGrid.getColumns()));
 		return recordsForGrid;
 	}
 	

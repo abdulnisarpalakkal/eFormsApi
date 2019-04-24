@@ -143,16 +143,17 @@ public class VirtualTableMasterServiceImpl implements VirtualTableMasterService 
 	
 	@Override
 	public VirtualTableFKConstraintRefDto findVirtualTableConstraintRefData(long processId) {
-		VirtualTableFKConstraintRefDto VirtualTableConstraintRefData=new VirtualTableFKConstraintRefDto();
+		VirtualTableFKConstraintRefDto virtualTableConstraintRefDto=new VirtualTableFKConstraintRefDto();
 		List<VirtualTableMaster> refTables=new ArrayList<VirtualTableMaster>();
 		List<VirtualTableConstraints> refPkConstraints=new  ArrayList<VirtualTableConstraints>();
 		
 		virtualTableMasterDao.findAllByProcess_Id(processId).iterator().forEachRemaining(refTables::add);
 		virtualTableConstraintsService.findAllByVirtualTableFieldByProcess(processId).iterator().forEachRemaining(refPkConstraints::add);
-		VirtualTableConstraintRefData.setRefPkConstraints(refPkConstraints);
-		VirtualTableConstraintRefData.setRefTables(refTables);
 		
-		return VirtualTableConstraintRefData;
+		virtualTableConstraintRefDto.setRefPkConstraints(refPkConstraints);
+		virtualTableConstraintRefDto.setRefTables(refTables);
+		
+		return virtualTableConstraintRefDto;
 	}
 	
 	

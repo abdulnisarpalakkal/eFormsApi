@@ -12,14 +12,18 @@ import org.springframework.stereotype.Service;
 import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.dao.FormDesignDao;
 import com.focowell.dao.FormRuleDao;
+import com.focowell.model.FormComponentRefValue;
 import com.focowell.model.FormComponentType;
 import com.focowell.model.FormDesign;
 import com.focowell.model.FormRule;
+import com.focowell.model.VirtualTableConstraintType;
+import com.focowell.model.VirtualTableConstraints;
 import com.focowell.model.dto.FormDesignDto;
 import com.focowell.service.FormDesignService;
 import com.focowell.service.FormRuleService;
 import com.focowell.service.FormRuleTypeService;
 import com.focowell.service.VirtualTableFieldsService;
+import com.focowell.service.VirtualTableRecordsService;
 
 @Service(value = "formDesignService")
 public class FormDesignServiceImpl implements FormDesignService {
@@ -35,6 +39,9 @@ public class FormDesignServiceImpl implements FormDesignService {
     
     @Autowired
     private FormRuleTypeService formRuleTypeService;
+    
+    @Autowired
+	private VirtualTableRecordsService virtualTableRecordsService;
 	
 	
 	
@@ -137,6 +144,31 @@ public class FormDesignServiceImpl implements FormDesignService {
 		
 		List<FormComponentType> list = Arrays.asList(FormComponentType.values());
 		return list;
+	}
+	
+	@Override
+	public void populateRefValuesIfForeignKey(FormDesign formDesign) {
+		if(formDesign.getVirtualTableField().getFieldConstraintList()==null || formDesign.getVirtualTableField().getFieldConstraintList().isEmpty() )
+			return;
+		VirtualTableConstraints foreignConstraint=formDesign.getVirtualTableField().getFieldConstraintList()
+				.stream().filter(constraint->constraint.getConstraintType()==VirtualTableConstraintType.FOREIGN_KEY).findFirst().orElse(null);
+		if(foreignConstraint!=null) {
+			long tableId=foreignConstraint.getForeignConstraint().getVirtualTableField().getVirtualTableMaster().getId();
+			FormComponentRefValue compRefValue=new FormComponentRefValue();
+			compRefValue.setRefKey(foreignConstraint.getForeignConstraint().getVirtualTableField().getFieldName());
+			if(formDesign.getComponentRefValues()==null) 
+				compRefValue.setRefValue(foreignConstraint.getForeignConstraint().getVirtualTableField().getFieldName());
+			else 
+				compRefValue.setRefValue(formDesign.getComponentRefValues().stream().findFirst().get().getRefValue());
+			
+			formDesign.setComponentRefValues(
+					virtualTableRecordsService.findAllFormComponentRefValueByTableAndFields(
+							tableId,
+							compRefValue.getRefKey(), //reference key always will be the primary field of reference table
+							compRefValue.getRefValue()
+							));
+			formDesign.setComponentType(FormComponentType.COMPO);
+		}
 	}
 	
 	
