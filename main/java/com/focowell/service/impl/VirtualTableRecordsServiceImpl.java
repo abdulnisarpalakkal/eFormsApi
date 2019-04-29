@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,11 +20,13 @@ import com.focowell.dao.VirtualTableRecordsDao;
 import com.focowell.model.FormComponentRefValue;
 import com.focowell.model.FormComponentType;
 import com.focowell.model.FormDesign;
+import com.focowell.model.FormMaster;
 import com.focowell.model.VirtualTableConstraintType;
 import com.focowell.model.VirtualTableField;
 import com.focowell.model.VirtualTableFieldDataType;
 import com.focowell.model.VirtualTableRecords;
 import com.focowell.model.dto.VirtualTableRecordForGridDto;
+import com.focowell.service.FileService;
 import com.focowell.service.FormDesignService;
 import com.focowell.service.VirtualTableFieldsService;
 import com.focowell.service.VirtualTableRecordsService;
@@ -43,6 +46,12 @@ public class VirtualTableRecordsServiceImpl implements VirtualTableRecordsServic
 	
 	@Autowired
 	private FormDesignService formDesignService;
+
+	@Autowired
+	private VirtualTableFieldsService virtualTableFieldService;
+	
+	@Autowired
+	private FileService fileService;
 	
 	@Override
 	public List<VirtualTableRecords> findAll() {
@@ -127,6 +136,8 @@ public class VirtualTableRecordsServiceImpl implements VirtualTableRecordsServic
 				FormDesign design=new FormDesign(field.getFieldName(),field.getFieldName(),FormComponentType.TEXT,index++,field);
 				if(field.getFieldDataType()==VirtualTableFieldDataType.DATE)
 					design.setComponentType(FormComponentType.DATE);
+				if(field.getFieldDataType()==VirtualTableFieldDataType.BLOB)
+					design.setComponentType(FormComponentType.FILE);
 				else
 					formDesignService.populateRefValuesIfForeignKey(design);
 				
@@ -187,6 +198,7 @@ public class VirtualTableRecordsServiceImpl implements VirtualTableRecordsServic
 		long pkValue=getPkValueFromRecords(records);
 		
 		records.forEach(record->{
+		
 			record.setPkValue(pkValue);
 		});
 		virtualTableRecordsDao.saveAll(records);
@@ -227,5 +239,82 @@ public class VirtualTableRecordsServiceImpl implements VirtualTableRecordsServic
 //        }
         return false;
     }
-
+	@Override
+	public long saveVirtualRecordsFromForm(FormMaster form) throws Exception {
+		
+		Set<VirtualTableRecords> virtualTableRecords=new HashSet<VirtualTableRecords>();
+		List<VirtualTableField> fields=	virtualTableFieldService.findAllByTableId(form.getVirtualTableMaster().getId());
+		
+		VirtualTableField pkField=fields.stream()
+				.filter(field->field.getFieldConstraintList()!=null && field.getFieldConstraintList().stream().filter(constraint->constraint.getConstraintType()==VirtualTableConstraintType.PRIMARY_KEY).findAny().isPresent())
+				.findFirst().orElse(null);  	//finding primary key field
+		long pkValue=0;
+		pkValue=getPkValueFromForm(form.getFormDesignList(),pkField.getFieldName());
+				
+		if(pkValue==0)
+			pkValue=virtualTableSequenceService.getNextSeqByName(form.getVirtualTableMaster().getTableName()+"_seq");
+		for (VirtualTableField virtualTableField : fields) {
+			
+			VirtualTableRecords record=new VirtualTableRecords();
+			record.setVirtualTableFields(virtualTableField);
+			
+			if(pkField.getFieldName().equals(virtualTableField.getFieldName()))
+			{
+				record.setStringValue(Long.toString(pkValue));
+			}
+			else
+			{ 
+				record.setStringValue(getFieldValueFromFormComponent(form.getFormDesignList(),virtualTableField.getFieldName()));
+			}
+			record.setPkValue(pkValue);
+			virtualTableRecords.add(record);
+		}
+		saveAll(virtualTableRecords);
+		return pkValue;
+	}
+	
+	private long getPkValueFromForm(Set<FormDesign> formDesignList,String pkFieldName) throws Exception {
+		long pkValue=0;
+		try
+		{
+			String pkString=getFieldValueFromFormComponent(formDesignList,pkFieldName);
+			if(pkString!=null)
+				pkValue=Long.parseLong(pkString);
+		}
+		catch (NumberFormatException e) {
+			throw new Exception("Primary key value should be numeric");
+		}
+		return pkValue;
+	}
+	private String getFieldValueFromFormComponent(Set<FormDesign> formDesignList,String fieldName) {
+		Optional<FormDesign> formDesignOptional=formDesignList.stream()
+				.filter(design->design.getVirtualTableField().getFieldName().equals(fieldName)).findFirst();
+		if(formDesignOptional.isPresent())
+		{
+			FormDesign formDesign=formDesignOptional.get();
+			String componentValue=formDesign.getComponentValue();
+			if(formDesign.getComponentType()==FormComponentType.FILE) {
+				componentValue=fileService.getFileNameFromPath(componentValue);
+			}
+			else if(formDesign.getComponentType()==FormComponentType.IMG || formDesign.getComponentType()==FormComponentType.LABEL) // these are read only components
+				componentValue=null;
+			return componentValue;
+		}
+		return null;
+	}
+	@Override
+	public long updateVirtualRecordsFromForm(FormMaster form,long pkValue) {
+		Set<VirtualTableRecords> virtualTableRecords=null;
+		virtualTableRecords=new HashSet<VirtualTableRecords>();
+		virtualTableRecords=findAllByTableAndPk(form.getVirtualTableMaster().getId(),pkValue);
+		
+		
+		virtualTableRecords.forEach(record->{
+			String val=getFieldValueFromFormComponent(form.getFormDesignList(),record.getVirtualTableFields().getFieldName());
+			if(val!=null)
+				record.setStringValue(val);
+		});
+		saveAll(virtualTableRecords);
+		return pkValue;
+	}
 }

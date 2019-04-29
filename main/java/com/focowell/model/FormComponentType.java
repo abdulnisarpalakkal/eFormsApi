@@ -6,7 +6,9 @@ public enum FormComponentType {
     CHECKBOX("CHECKBOX"),
     COMPO("COMPO"),
     DATE("DATE"),
-    LABEL("LABEL");
+    LABEL("LABEL"),
+	FILE("FILE"),
+	IMG("IMG");
    
 
     private final String componentType;

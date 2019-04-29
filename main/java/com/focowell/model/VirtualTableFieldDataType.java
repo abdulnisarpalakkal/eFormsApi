@@ -6,7 +6,8 @@ public enum VirtualTableFieldDataType {
 	NUMBER(0),
     STRING(1),
     DATE(2),
-    BOOLEAN(3);
+    BOOLEAN(3),
+    BLOB(4);
    
 
     private final int dataType;

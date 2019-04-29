@@ -1,23 +1,35 @@
 package com.focowell.service.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.focowell.config.error.StorageException;
 import com.focowell.dao.WorkflowTrackMasterDao;
 import com.focowell.model.FormComponentRefValue;
+import com.focowell.model.FormComponentType;
 import com.focowell.model.FormDesign;
 import com.focowell.model.FormMaster;
 import com.focowell.model.User;
@@ -32,6 +44,7 @@ import com.focowell.model.WorkflowNodeType;
 import com.focowell.model.WorkflowStage;
 import com.focowell.model.WorkflowTrackDet;
 import com.focowell.model.WorkflowTrackMaster;
+import com.focowell.service.FileService;
 import com.focowell.service.FormDesignService;
 import com.focowell.service.UserService;
 import com.focowell.service.VirtualTableFieldsService;
@@ -71,6 +84,11 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 	
 	@Autowired
 	private FormDesignService formDesignService;
+	
+	@Autowired
+	private FileService fileService;
+	
+	
 	
 	@Override
 	public List<WorkflowTrackMaster> findAll() {
@@ -228,7 +246,19 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 								.getFieldName().equals(record.getVirtualTableFields().getFieldName()))
 								.map(VirtualTableRecords::getStringValue)
 								.map(Optional::ofNullable).findFirst().orElse(null);
-				design.setComponentValue(val!=null?(val.isPresent()?val. get():null):null);
+				if(design.getComponentType()==FormComponentType.IMG) {
+					if(val!=null & val.isPresent()) {
+						File file =fileService.getFile(val.get());
+						try {
+							String encodeImage = Base64.getEncoder().withoutPadding().encodeToString(Files.readAllBytes(file.toPath()));
+							design.setComponentValue(encodeImage);
+						} catch (IOException e) {
+							
+						}
+					}
+				}
+				else
+					design.setComponentValue(val!=null?(val.isPresent()?val. get():null):null);
 				
 				
 			});
@@ -253,7 +283,7 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 		
 		WorkflowTrackDet workflowTrackDet=new WorkflowTrackDet();
 		if(WorkflowStage.getWorkflowTrackDet()==null) { 	// if it is start of workflow, then workflowTrackMaster need to be saved
-			pkValue=saveVirtualRecords(WorkflowStage.getFormNode().getFormMaster()); //Saving form data
+			pkValue=virtualTableRecordsService.saveVirtualRecordsFromForm(WorkflowStage.getFormNode().getFormMaster()); //Saving form data
 			
 			Set<WorkflowTrackDet> trackDetails=new HashSet<WorkflowTrackDet>();
 			trackDetails.add(workflowTrackDet);
@@ -269,7 +299,7 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 			workflowTrackMaster.getWorkflowTrackDetList().size(); //initialize existing track records
 			workflowTrackMaster.getWorkflowTrackDetList().add(workflowTrackDet);
 			
-			pkValue=updateVirtualRecords(WorkflowStage.getFormNode().getFormMaster(),workflowTrackMaster.getDataId()); //Updating form data
+			pkValue=virtualTableRecordsService.updateVirtualRecordsFromForm(WorkflowStage.getFormNode().getFormMaster(),workflowTrackMaster.getDataId()); //Updating form data
 			
 			
 		}
@@ -300,78 +330,17 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 		}
 		
 		if(pkValue==0) 
-			return saveVirtualRecords(form);
+			return virtualTableRecordsService.saveVirtualRecordsFromForm(form);
 	
-		return updateVirtualRecords(form,pkValue);
+		return virtualTableRecordsService.updateVirtualRecordsFromForm(form,pkValue);
 			
 	}
 	
-	private long saveVirtualRecords(FormMaster form) throws Exception {
-		
-		Set<VirtualTableRecords> virtualTableRecords=new HashSet<VirtualTableRecords>();
-		List<VirtualTableField> fields=	virtualTableFieldService.findAllByTableId(form.getVirtualTableMaster().getId());
-		
-		VirtualTableField pkField=fields.stream()
-				.filter(field->field.getFieldConstraintList()!=null && field.getFieldConstraintList().stream().filter(constraint->constraint.getConstraintType()==VirtualTableConstraintType.PRIMARY_KEY).findAny().isPresent())
-				.findFirst().orElse(null);  	//finding primary key field
-		long pkValue=0;
-		pkValue=getPkValueFromForm(form.getFormDesignList(),pkField.getFieldName());
-				
-		if(pkValue==0)
-			pkValue=virtualTableSequenceService.getNextSeqByName(form.getVirtualTableMaster().getTableName()+"_seq");
-		for (VirtualTableField virtualTableField : fields) {
-			
-			VirtualTableRecords record=new VirtualTableRecords();
-			record.setVirtualTableFields(virtualTableField);
-			
-			if(pkField.getFieldName().equals(virtualTableField.getFieldName()))
-			{
-				record.setStringValue(Long.toString(pkValue));
-			}
-			else
-			{ 
-				record.setStringValue(getFieldValueFromFormComponent(form.getFormDesignList(),virtualTableField.getFieldName()));
-			}
-			record.setPkValue(pkValue);
-			virtualTableRecords.add(record);
-		}
-		virtualTableRecordsService.saveAll(virtualTableRecords);
-		return pkValue;
-	}
-	private long updateVirtualRecords(FormMaster form,long pkValue) {
-		Set<VirtualTableRecords> virtualTableRecords=null;
-		virtualTableRecords=new HashSet<VirtualTableRecords>();
-		virtualTableRecords=virtualTableRecordsService.findAllByTableAndPk(form.getVirtualTableMaster().getId(),pkValue);
-		
-		
-		virtualTableRecords.forEach(record->{
-			String val=getFieldValueFromFormComponent(form.getFormDesignList(),record.getVirtualTableFields().getFieldName());
-			if(val!=null)
-				record.setStringValue(val);
-		});
-		virtualTableRecordsService.saveAll(virtualTableRecords);
-		return pkValue;
-	}
-	private long getPkValueFromForm(Set<FormDesign> formDesignList,String pkFieldName) throws Exception {
-		long pkValue=0;
-		try
-		{
-			String pkString=getFieldValueFromFormComponent(formDesignList,pkFieldName);
-			if(pkString!=null)
-				pkValue=Long.parseLong(pkString);
-		}
-		catch (NumberFormatException e) {
-			throw new Exception("Primary key value should be numeric");
-		}
-		return pkValue;
-	}
-	private String getFieldValueFromFormComponent(Set<FormDesign> formDesignList,String fieldName) {
-		Optional<FormDesign> formDesign=formDesignList.stream()
-				.filter(design->design.getVirtualTableField().getFieldName().equals(fieldName)).findFirst();
-		if(formDesign.isPresent())
-			return formDesign.get().getComponentValue();
-		return null;
-	}
+	
+	
+	
+	
+	
 	@Override
 	public boolean formIsAccessable(FormMaster form) {
 		//check whether this form is accessable for user

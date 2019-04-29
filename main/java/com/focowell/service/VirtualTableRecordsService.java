@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.model.FormComponentRefValue;
+import com.focowell.model.FormMaster;
 import com.focowell.model.VirtualTableRecords;
 import com.focowell.model.dto.VirtualTableRecordForGridDto;
 
@@ -27,5 +28,7 @@ public interface VirtualTableRecordsService {
 		Set<VirtualTableRecords> findAllByTableAndPk(long tableId, long pkValue);
 		List<Map> findAllRecordsByTable(long tableId);
 		List<VirtualTableRecords> saveOneRowRecordAfterCheckPkValue(List<VirtualTableRecords> records) throws Exception;
+		long saveVirtualRecordsFromForm(FormMaster form) throws Exception;
+		long updateVirtualRecordsFromForm(FormMaster form, long pkValue);
 		
 }

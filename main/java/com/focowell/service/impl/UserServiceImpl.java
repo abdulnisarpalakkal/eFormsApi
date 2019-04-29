@@ -10,6 +10,7 @@ import com.focowell.model.dto.UserDto;
 import com.focowell.service.UserRolesService;
 import com.focowell.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -32,6 +33,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 	
 	@Autowired
 	private UserRolesService userRolesService;
+	
 	
 	@Autowired
 	private BCryptPasswordEncoder bcryptEncoder;

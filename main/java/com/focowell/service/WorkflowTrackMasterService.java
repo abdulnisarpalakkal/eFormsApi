@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.web.multipart.MultipartFile;
+
+import com.focowell.config.error.StorageException;
 import com.focowell.model.FormMaster;
 import com.focowell.model.VirtualTableField;
 import com.focowell.model.VirtualTableRecords;
@@ -27,5 +30,6 @@ public interface WorkflowTrackMasterService {
 		boolean formIsAccessable(FormMaster form);
 		
 		long mergeVirtualRecords(FormMaster form, long pkValue) throws Exception;
+		
 		
 }

@@ -7,6 +7,7 @@ import com.focowell.model.dto.UserDto;
 import com.focowell.model.dto.VirtualTableFKConstraintRefDto;
 import com.focowell.model.dto.VirtualTableFieldsConstraintDto;
 import com.focowell.model.dto.VirtualTableRecordForGridDto;
+import com.focowell.model.FormMaster;
 import com.focowell.model.User;
 import com.focowell.model.VirtualTableField;
 import com.focowell.service.VirtualTableMasterService;
@@ -92,6 +93,11 @@ public class VirtualTableMasterController {
     @RequestMapping(value="/virtualTableMaster/records", method = RequestMethod.POST)
     public List<VirtualTableRecords> addOneRowRecordAfterCheckPkValue(@RequestBody List<VirtualTableRecords> records) throws Exception {
         return virtualTableRecordsService.saveOneRowRecordAfterCheckPkValue(records);
+    }
+    
+    @RequestMapping(value="/virtualTableMaster/records/form", method = RequestMethod.POST)
+    public long addOneRowRecordAfterCheckPkValueFromForm(@RequestBody FormMaster formMaster) throws Exception {
+        return virtualTableRecordsService.saveVirtualRecordsFromForm(formMaster);
     }
     
     @RequestMapping(value="/virtualTableMaster/records/{tableId}/{pkValue}", method = RequestMethod.DELETE)
