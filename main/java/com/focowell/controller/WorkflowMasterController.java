@@ -53,7 +53,10 @@ public class WorkflowMasterController {
     public List<WorkflowMaster> listPublished(){
         return workflowMasterService.findAllPublished();
     }
-    
+    @RequestMapping(value="/workflows/published/child/{processId}", method = RequestMethod.GET)
+    public List<WorkflowMaster> listAllPublishedChildWorkflowsByProcess(@PathVariable(value = "processId") Long processId){
+        return workflowMasterService.findAllPublishedChildWorkflowsByProcess(processId);
+    }
     @RequestMapping(value = "/workflows/{id}", method = RequestMethod.GET)
     public WorkflowMaster getOne(@PathVariable(value = "id") Long id){
         return workflowMasterService.findById(id);

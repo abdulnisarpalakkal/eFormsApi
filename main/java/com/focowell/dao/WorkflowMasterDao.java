@@ -20,6 +20,9 @@ public interface WorkflowMasterDao extends CrudRepository<WorkflowMaster, Long> 
 	@Query("SELECT v FROM WorkflowMaster v left join fetch v.process p where p.id=:processId ")
 	Iterable<WorkflowMaster> findAllByProcessJPQL(@Param("processId")long  processId);
 	
-	@Query("SELECT v FROM WorkflowMaster v left join fetch v.process where v.published=true ")
+	@Query("SELECT v FROM WorkflowMaster v left join fetch v.process where v.published=true and v.child=false ")
 	Iterable<WorkflowMaster> findAllPublishedByJPQL();
+	
+	@Query("SELECT v FROM WorkflowMaster v left join fetch v.process p where p.id=:processId and v.published=true and v.child=true ")
+	Iterable<WorkflowMaster> findAllPublishedChildWorkflowsByProcessJPQL(@Param("processId") long  processId);
 }

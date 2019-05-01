@@ -46,12 +46,17 @@ public class WorkflowMaster {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
 	private Date publishDate=new Date();
 	
+	@Column(name="child")
+	private boolean child;
+	
 	@ManyToOne(fetch=FetchType.LAZY)    
 	private User publishUser;
 	
 	@ManyToOne(fetch=FetchType.LAZY) 
 	private ProcessData process;
 	
+
+	@JsonIgnoreProperties(value= "workflowMaster",allowSetters=true)
 	@OneToMany( mappedBy="workflowMaster",cascade = CascadeType.ALL,orphanRemoval=true)   
 	public Set<WorkflowNode> workflowNodeList;
 	
@@ -62,6 +67,10 @@ public class WorkflowMaster {
 //	@JsonIgnore
 	@OneToMany( mappedBy="workflowMaster",cascade = CascadeType.REMOVE,orphanRemoval=true)   
 	public Set<WorkflowTrackMaster> workflowTrackList;
+	
+	@JsonIgnoreProperties(value= "childWorkflow",allowSetters=true)
+	@OneToMany( mappedBy="childWorkflow")   
+	public Set<WorkflowNode> childNodeList;
 	
 	public long getId() {
 		return id;
@@ -135,6 +144,14 @@ public class WorkflowMaster {
 		this.publishUser = publishUser;
 	}
 
+	public boolean isChild() {
+		return child;
+	}
+
+	public void setChild(boolean child) {
+		this.child = child;
+	}
+
 	public Set<WorkflowTrackMaster> getWorkflowTrackList() {
 		return workflowTrackList;
 	}
@@ -153,6 +170,14 @@ public class WorkflowMaster {
 //		    }
 //		}
 		
+	}
+
+	public Set<WorkflowNode> getChildNodeList() {
+		return childNodeList;
+	}
+
+	public void setChildNodeList(Set<WorkflowNode> childNodeList) {
+		this.childNodeList = childNodeList;
 	}
 
 	

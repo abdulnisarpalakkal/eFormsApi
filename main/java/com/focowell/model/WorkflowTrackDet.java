@@ -41,6 +41,10 @@ public class WorkflowTrackDet {
 	@ManyToOne(cascade = {CascadeType.PERSIST,CascadeType.MERGE} ,fetch=FetchType.LAZY)    
 	private WorkflowTrackMaster workflowTrackMaster;
 	
+	@JsonIgnoreProperties(value="parentWorkflowTrackDetList",allowSetters=true)
+	@ManyToOne(fetch=FetchType.LAZY)    
+	private WorkflowTrackMaster childWorkflowTrackMaster;
+	
 	@JsonIgnoreProperties(value="workflowTrackDetList",allowSetters=true)
 	@ManyToOne(fetch=FetchType.EAGER)    
 	private WorkflowNode workflowNode;
@@ -98,6 +102,14 @@ public class WorkflowTrackDet {
 
 	public void setOpen(boolean open) {
 		this.open = open;
+	}
+
+	public WorkflowTrackMaster getChildWorkflowTrackMaster() {
+		return childWorkflowTrackMaster;
+	}
+
+	public void setChildWorkflowTrackMaster(WorkflowTrackMaster childWorkflowTrackMaster) {
+		this.childWorkflowTrackMaster = childWorkflowTrackMaster;
 	}
 
 	@Override

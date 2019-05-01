@@ -69,8 +69,8 @@ public class WorkflowTrackMasterController {
     }
     
     @RequestMapping(value="/workflowTrackMasters/action", method = RequestMethod.POST)
-    public WorkflowTrackDet submitAction(@RequestBody WorkflowStage workflowStage) throws Exception {
-    	return workflowTrackMasterService.submitAction(workflowStage);
+    public void submitAction(@RequestBody WorkflowStage workflowStage) throws Exception {
+    	 workflowTrackMasterService.submitAction(workflowStage);
     }
    
 }

@@ -39,6 +39,7 @@ import com.focowell.model.VirtualTableConstraints;
 import com.focowell.model.VirtualTableField;
 import com.focowell.model.VirtualTableRecords;
 import com.focowell.model.WorkflowLink;
+import com.focowell.model.WorkflowMaster;
 import com.focowell.model.WorkflowNode;
 import com.focowell.model.WorkflowNodeType;
 import com.focowell.model.WorkflowStage;
@@ -126,6 +127,13 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 					
         return workflowTrackMasterDao.save(updateWorkflowTrackMaster);
 	}
+	@Override
+	public WorkflowTrackMaster completeWorkflow(WorkflowTrackMaster workflowTrackMaster) {
+		WorkflowTrackMaster updateWorkflowTrackMaster =workflowTrackMasterDao.findById(workflowTrackMaster.getId()).get();
+		updateWorkflowTrackMaster.setCompleted(true);
+					
+        return workflowTrackMasterDao.save(updateWorkflowTrackMaster);
+	}
 	
 	//find all published and open workflows
 	
@@ -154,14 +162,17 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 		});
 	}
 	private void getAllOpenWorkflows(List<WorkflowStage> workflowStages) {
-		workflowTrackDetService.findAllByOpen(true).forEach(track->{
+		for(WorkflowTrackDet track: workflowTrackDetService.findAllByOpen(true)){
 			
+			if(!isWorkflowValid(track))
+				continue;
+						
 			WorkflowStage stage=new WorkflowStage();
 			stage.setWorkflowTrackDet(track);
 			Hibernate.initialize(track.getWorkflowTrackMaster().getWorkflowMaster());
 			Hibernate.initialize(track.getWorkflowTrackMaster().getWorkflowMaster().getProcess());
 			stage.setWorkflowMaster(track.getWorkflowTrackMaster().getWorkflowMaster());
-			
+								
 			WorkflowLink link=workflowLinkService.findBySourceId(track.getWorkflowNode().getNodeId());
 			if(link!=null) {
 				Hibernate.initialize(link.getTargetNode());
@@ -169,9 +180,17 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 				if(formIsAccessable(stage.getFormNode().getFormMaster())) //check whether this form is accessable for user
 					workflowStages.add(stage);
 			}
-		});
+		}
 	}
-	
+	private boolean isWorkflowValid(WorkflowTrackDet track) {
+		boolean valid=true;
+		if(track.getWorkflowNode().getNodeType()==WorkflowNodeType.CHILD_WORKFLOW) { //check child workflow is completed if it is child workflow node
+			Hibernate.initialize(track.getChildWorkflowTrackMaster());
+			valid=track.getChildWorkflowTrackMaster().isCompleted();
+			
+		}
+		return valid;
+	}
 	//this function will be called when user click on the workflow link
 	@Override
 	public WorkflowStage execute(WorkflowStage workflowStage) {
@@ -189,8 +208,8 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 				throw new AccessDeniedException("You dont have access privilage to this form");
 			Hibernate.initialize(formNode.getFormMaster().getVirtualTableMaster()); //lazy initialization of vrtual table
 			Hibernate.initialize(formNode.getFormMaster().getFormDesignList()); //lazy initialization of form design
-
-			if(workflowStage.getWorkflowTrackDet()!=null ) {  //if it is not start form then fetch data that is submitted previously
+			boolean isWorkflowStarting=workflowStage.getWorkflowTrackDet()==null;
+			if(!isWorkflowStarting ) {  //if it is not start form then fetch data that is submitted previously
 				formNode.getFormMaster().setVirtualTableRecords(
 						virtualTableRecordsService.findAllByTableAndPk(formNode.getFormMaster().getVirtualTableMaster().getId(),workflowStage.getWorkflowTrackDet().getWorkflowTrackMaster().getDataId()));
 				setValuesToForm(formNode.getFormMaster().getVirtualTableRecords(), formNode.getFormMaster().getFormDesignList());	 //setting form value if form is view
@@ -273,55 +292,101 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 	}
 	@Override
 	@Transactional
-	public WorkflowTrackDet submitAction(WorkflowStage WorkflowStage) throws Exception {
+	public void submitAction(WorkflowStage WorkflowStage) throws Exception {
 		Authentication auth=SecurityContextHolder.getContext().getAuthentication();
 		User user=userService.findOne(auth.getName());
 		
 		long pkValue=0;
 		
 		WorkflowTrackMaster workflowTrackMaster=null;
+		WorkflowNode currentWorkflowNode=null;
+		WorkflowNode currentSourceNode=null;
+		WorkflowNode currentTargetNode=null;
+		WorkflowMaster childWorkflow=null;
 		
-		WorkflowTrackDet workflowTrackDet=new WorkflowTrackDet();
-		if(WorkflowStage.getWorkflowTrackDet()==null) { 	// if it is start of workflow, then workflowTrackMaster need to be saved
+		boolean isWorkflowStarting=WorkflowStage.getWorkflowTrackDet()==null;
+		
+		
+		WorkflowLink nextLink=workflowLinkService.findBySourceId(WorkflowStage.getSelectedActionNode().getNodeId()); //get next link
+		if(nextLink!=null) {
+			
+			currentSourceNode=nextLink.getSourceNode();
+			currentTargetNode=nextLink.getTargetNode();
+			currentWorkflowNode=nextLink.getTargetNode().getNodeType()==WorkflowNodeType.CHILD_WORKFLOW?currentTargetNode:currentSourceNode;
+			childWorkflow=nextLink.getTargetNode().getChildWorkflow();
+		}
+								
+		if(isWorkflowStarting) { 	// if it is start of workflow, then workflowTrackMaster need to be saved
 			pkValue=virtualTableRecordsService.saveVirtualRecordsFromForm(WorkflowStage.getFormNode().getFormMaster()); //Saving form data
+			WorkflowTrackMaster childWorkflowTrack=initiateChildWorkflow(nextLink,childWorkflow,user,pkValue);
+			initiateWorkflow(user,WorkflowStage.getWorkflowMaster(),pkValue,nextLink,currentWorkflowNode,childWorkflowTrack);
 			
-			Set<WorkflowTrackDet> trackDetails=new HashSet<WorkflowTrackDet>();
-			trackDetails.add(workflowTrackDet);
-			
-			workflowTrackMaster=new WorkflowTrackMaster(WorkflowStage.getWorkflowMaster(),user,pkValue,trackDetails);
 		}
 		else {
-			
-			WorkflowStage.getWorkflowTrackDet().setOpen(false);
-			workflowTrackDetService.update(WorkflowStage.getWorkflowTrackDet()); //closing the current stage
+			closeCurrentStage(WorkflowStage.getWorkflowTrackDet()); //closing the current stage
 			
 			workflowTrackMaster=findById(WorkflowStage.getWorkflowTrackDet().getWorkflowTrackMaster().getId()); //find track master if it is not first stage
 			workflowTrackMaster.getWorkflowTrackDetList().size(); //initialize existing track records
-			workflowTrackMaster.getWorkflowTrackDetList().add(workflowTrackDet);
-			
+		
 			pkValue=virtualTableRecordsService.updateVirtualRecordsFromForm(WorkflowStage.getFormNode().getFormMaster(),workflowTrackMaster.getDataId()); //Updating form data
+			WorkflowTrackMaster childWorkflowTrack=initiateChildWorkflow(nextLink,childWorkflow,user,pkValue);
 			
-			
+			updateWorkflow(user,workflowTrackMaster,pkValue,nextLink,currentWorkflowNode,childWorkflowTrack);
 		}
 		
-		
-		workflowTrackDet.setWorkflowNode(WorkflowStage.getSelectedActionNode());
-		workflowTrackDet.setAccessUser(user);
-		
 	
-		
-		WorkflowLink link=workflowLinkService.findBySourceId(WorkflowStage.getSelectedActionNode().getNodeId()); //get next link
-		workflowTrackDet.setOpen(WorkflowStage.getSelectedActionNode().getNodeType()!=WorkflowNodeType.STOP 
-				&& link!=null && link.getTargetNode().getNodeType()!=WorkflowNodeType.STOP); //open next stage if source or dest node is not STOP
 				
-		workflowTrackDet.setWorkflowTrackMaster(workflowTrackMaster); // set parent track to details track
-		
-		return workflowTrackDetService.save(workflowTrackDet);
-		
-		
-		
 	}
-	
+	private boolean isWorkflowCompleted(WorkflowLink nextLink) {
+		
+		return nextLink==null || nextLink.getSourceNode().getNodeType()==WorkflowNodeType.STOP || nextLink.getTargetNode().getNodeType()==WorkflowNodeType.STOP;
+	}
+	private WorkflowTrackMaster initiateChildWorkflow(WorkflowLink parentLink,WorkflowMaster childWorkflow,User user,long pkValue) {
+		if(parentLink==null || parentLink.getTargetNode().getNodeType()!=WorkflowNodeType.CHILD_WORKFLOW) 
+			return null;
+		Hibernate.initialize(childWorkflow);
+		WorkflowLink firstLink=workflowLinkService.findStartNodeByWorkflow(childWorkflow.getId());
+		return initiateWorkflow(user,childWorkflow,pkValue,firstLink,firstLink.getSourceNode(),null);
+	}
+	private WorkflowTrackMaster initiateWorkflow(User user,WorkflowMaster workflowMaster,long pkValue,WorkflowLink nextLink,WorkflowNode currentWorkflowNode,WorkflowTrackMaster childWorkflowTrack) {
+		WorkflowTrackMaster workflowTrackMaster=null;
+		boolean isCompleted=isWorkflowCompleted(nextLink);
+		WorkflowTrackDet workflowTrackDet=new WorkflowTrackDet();
+		
+		workflowTrackMaster=new WorkflowTrackMaster(workflowMaster,user,pkValue,new HashSet<WorkflowTrackDet>());
+		workflowTrackMaster.getWorkflowTrackDetList().add(workflowTrackDet);	
+		workflowTrackMaster.setCompleted(isCompleted); //update status if workflow is completed
+		
+		workflowTrackDet.setWorkflowTrackMaster(workflowTrackMaster);
+		workflowTrackDet.setWorkflowNode(currentWorkflowNode);
+		workflowTrackDet.setOpen(!isCompleted); //open next stage if source or dest node is not STOP
+				
+		workflowTrackDet.setAccessUser(user);
+		workflowTrackDet.setChildWorkflowTrackMaster(childWorkflowTrack);
+		workflowTrackDetService.save(workflowTrackDet);
+		return workflowTrackMaster;
+	}
+	private WorkflowTrackMaster updateWorkflow(User user,WorkflowTrackMaster workflowTrackMaster,long pkValue,WorkflowLink nextLink,WorkflowNode currentWorkflowNode,WorkflowTrackMaster childWorkflowTrack) {
+		
+		boolean isCompleted=isWorkflowCompleted(nextLink);
+		WorkflowTrackDet workflowTrackDet=new WorkflowTrackDet();
+		
+		workflowTrackMaster.getWorkflowTrackDetList().add(workflowTrackDet);	
+		workflowTrackMaster.setCompleted(isCompleted); //update status if workflow is completed
+		
+		workflowTrackDet.setWorkflowTrackMaster(workflowTrackMaster);
+		workflowTrackDet.setWorkflowNode(currentWorkflowNode);
+		workflowTrackDet.setOpen(!isCompleted); //open next stage if source or dest node is not STOP
+				
+		workflowTrackDet.setAccessUser(user);
+		workflowTrackDetService.save(workflowTrackDet);
+		workflowTrackDet.setChildWorkflowTrackMaster(childWorkflowTrack);
+		return workflowTrackMaster;
+	}
+	private void closeCurrentStage(WorkflowTrackDet currentWorkflowTrackDet) {
+		currentWorkflowTrackDet.setOpen(false);
+		workflowTrackDetService.update(currentWorkflowTrackDet); //closing the current stage
+	}
 	@Override
 	public long mergeVirtualRecords(FormMaster form,long pkValue ) throws Exception {
 		
@@ -344,6 +409,8 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 	@Override
 	public boolean formIsAccessable(FormMaster form) {
 		//check whether this form is accessable for user
+		if(form==null)
+			return false;
 		Authentication auth=SecurityContextHolder.getContext().getAuthentication();
 		User user=userService.findOne(auth.getName());
 		form.getAccessGroups().size();

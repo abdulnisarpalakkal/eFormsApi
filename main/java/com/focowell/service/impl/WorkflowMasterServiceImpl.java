@@ -58,6 +58,13 @@ public class WorkflowMasterServiceImpl implements WorkflowMasterService {
 		workflowMasterDao.findAllPublishedByJPQL().iterator().forEachRemaining(list::add);
 		return list;
 	}
+	@Override
+	public List<WorkflowMaster> findAllPublishedChildWorkflowsByProcess(long processId) {
+		List<WorkflowMaster> list = new ArrayList<>();
+		workflowMasterDao.findAllPublishedChildWorkflowsByProcessJPQL(processId).iterator().forEachRemaining(list::add);
+		return list;
+	}
+	
 	
 	@Override
 	public void delete(long id) {
@@ -85,9 +92,18 @@ public class WorkflowMasterServiceImpl implements WorkflowMasterService {
 		}
 		return workflowMasterDao.save(workflowMaster);
 	}
+
+/*	Save or update design with all dependencies set in bidirectional
+	WorkflowNode
+	WorkflowLink
+	WorkflowActions
+	WorkflowActionParams
+	
+*/
 	@Override
 	@Transactional
 	public void saveDesign(WorkflowMaster workflowMaster) throws AlreadyExistsException  {
+		
 		for (WorkflowNode workflowNode : workflowMaster.getWorkflowNodeList()) {
 			workflowNode.setWorkflowMaster(workflowMaster);
 			if(workflowNode.getSourceLinkList()!=null)
@@ -120,6 +136,7 @@ public class WorkflowMasterServiceImpl implements WorkflowMasterService {
 			
 		}
 		workflowMaster.setWorkflowTrackList(Collections.emptySet());
+		workflowMaster.setPublished(false);
 //		if(workflowMaster.getWorkflowLinkList()!=null)
 //			workflowMaster.getWorkflowLinkList().clear();
 		workflowMasterDao.save(workflowMaster);
@@ -132,6 +149,8 @@ public class WorkflowMasterServiceImpl implements WorkflowMasterService {
 		updateWorkflowMaster.setWorkflowName(workflowMaster.getWorkflowName());
 		updateWorkflowMaster.setWorkflowDesc(workflowMaster.getWorkflowDesc());
 		updateWorkflowMaster.setProcess(workflowMaster.getProcess());
+		updateWorkflowMaster.setChild(workflowMaster.isChild());
+		updateWorkflowMaster.setPublished(false);
 					
         return workflowMasterDao.save(updateWorkflowMaster);
 	}

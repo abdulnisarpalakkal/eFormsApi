@@ -4,7 +4,8 @@ public enum WorkflowNodeType {
 	START("START"),
     STOP("STOP"),
     FORM("FORM"),
-    ACTION("ACTION");
+    ACTION("ACTION"),
+    CHILD_WORKFLOW("CHILD_WORKFLOW");
 	
     private final String nodeType;
     private WorkflowNodeType(String nodeType){

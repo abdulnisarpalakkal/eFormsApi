@@ -17,4 +17,5 @@ public interface WorkflowMasterService {
 		void saveDesign(WorkflowMaster workflowMaster) throws AlreadyExistsException;
 		WorkflowMaster publishWorkflow(WorkflowMaster workflowMaster);
 		List<WorkflowMaster> findAllPublished();
+		List<WorkflowMaster> findAllPublishedChildWorkflowsByProcess(long processId);
 }

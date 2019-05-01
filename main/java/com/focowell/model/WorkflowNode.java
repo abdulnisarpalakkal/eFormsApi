@@ -53,8 +53,11 @@ public class WorkflowNode {
 	@ManyToOne(fetch=FetchType.LAZY)  
 	private FormMaster formMaster;
 	
+	@JsonIgnoreProperties(value="childNodeList",allowSetters=true) 
+	@ManyToOne(fetch=FetchType.LAZY) 
+	private WorkflowMaster childWorkflow;
 	
-	
+	@JsonIgnoreProperties(value="workflowNodeList",allowSetters=true) 
 	@ManyToOne(fetch=FetchType.LAZY) 
 	private WorkflowMaster workflowMaster;
 	
@@ -158,6 +161,22 @@ public class WorkflowNode {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public WorkflowMaster getChildWorkflow() {
+		return childWorkflow;
+	}
+
+	public void setChildWorkflow(WorkflowMaster childWorkflow) {
+		this.childWorkflow = childWorkflow;
+	}
+
+	public Set<WorkflowTrackDet> getWorkflowTrackDetList() {
+		return workflowTrackDetList;
+	}
+
+	public void setWorkflowTrackDetList(Set<WorkflowTrackDet> workflowTrackDetList) {
+		this.workflowTrackDetList = workflowTrackDetList;
 	}
 
 	

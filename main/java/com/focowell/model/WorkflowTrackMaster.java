@@ -56,9 +56,16 @@ public class WorkflowTrackMaster {
 	@OneToMany( mappedBy="workflowTrackMaster",cascade = CascadeType.ALL,orphanRemoval=true)   
 	public Set<WorkflowTrackDet> workflowTrackDetList;
 	
+	@JsonIgnoreProperties(value="childWorkflowTrackMaster",allowSetters=true)
+	@OneToMany( mappedBy="childWorkflowTrackMaster")   
+	public Set<WorkflowTrackDet> parentWorkflowTrackDetList;
+	
 	@Column(name="data_id")
 	private long dataId;
-
+	
+	@Column(name="completed")
+	private boolean completed;
+	
 	public long getId() {
 		return id;
 	}
@@ -105,6 +112,18 @@ public class WorkflowTrackMaster {
 
 	public void setDataId(long dataId) {
 		this.dataId = dataId;
+	}
+	public boolean isCompleted() {
+		return completed;
+	}
+	public void setCompleted(boolean completed) {
+		this.completed = completed;
+	}
+	public Set<WorkflowTrackDet> getParentWorkflowTrackDetList() {
+		return parentWorkflowTrackDetList;
+	}
+	public void setParentWorkflowTrackDetList(Set<WorkflowTrackDet> parentWorkflowTrackDetList) {
+		this.parentWorkflowTrackDetList = parentWorkflowTrackDetList;
 	}
 
 //	@Override
