@@ -1,6 +1,5 @@
 package com.focowell.config;
 
-import com.focowell.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -8,13 +7,15 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import com.focowell.model.User;
+
+import static com.focowell.model.Constants.ACCESS_TOKEN_VALIDITY_SECONDS;
+import static com.focowell.model.Constants.SIGNING_KEY;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.function.Function;
-
-import static com.focowell.model.Constants.ACCESS_TOKEN_VALIDITY_SECONDS;
-import static com.focowell.model.Constants.SIGNING_KEY;
 
 @Component
 public class JwtTokenUtil implements Serializable {
@@ -22,7 +23,11 @@ public class JwtTokenUtil implements Serializable {
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
-
+    public String getTenantIdFromToken(String token) {
+    	final Claims claims = getAllClaimsFromToken(token);
+        return claims.get("tenantId").toString();
+       
+    }
     public Date getExpirationDateFromToken(String token) {
         return getClaimFromToken(token, Claims::getExpiration);
     }
@@ -44,14 +49,15 @@ public class JwtTokenUtil implements Serializable {
         return expiration.before(new Date());
     }
 
-    public String generateToken(UserDetails userDetails) {
-        return doGenerateToken(userDetails);
+    public String generateToken(UserDetails userDetails,String tenantId) {
+        return doGenerateToken(userDetails,tenantId);
     }
 
-    private String doGenerateToken(UserDetails userDetails) {
+    private String doGenerateToken(UserDetails userDetails,String tenantId) {
 
         Claims claims = Jwts.claims().setSubject(userDetails.getUsername());
         claims.put("scopes", userDetails.getAuthorities());
+        claims.put("tenantId", tenantId);
 
         return Jwts.builder()
                 .setClaims(claims)

@@ -1,6 +1,5 @@
 package com.focowell.dao;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.focowell.model.VirtualTableConstraintType;
 import com.focowell.model.VirtualTableMaster;
 
 
@@ -27,4 +27,9 @@ public interface VirtualTableMasterDao extends CrudRepository<VirtualTableMaster
 	
 	Iterable<VirtualTableMaster> findAllByProcess_Id(long processId);
 	
+	@Query("SELECT v FROM VirtualTableMaster v left join fetch v.process p  left join fetch v.virtualTableFieldsList f "
+			+ " left join fetch f.fieldConstraintList c left join fetch c.foreignConstraint fConstraint "
+			+ "left join fetch fConstraint.virtualTableField fField left join fetch fField.virtualTableMaster fTable where c.constraintType=:constraintType "
+			+ " and fTable.id=:tableId ")
+	Iterable<VirtualTableMaster> findAllTablesReferringMeJPQL(@Param("constraintType") VirtualTableConstraintType constraintType, @Param("tableId") long tableId);
 }

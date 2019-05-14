@@ -38,6 +38,7 @@ public class CategoryController {
     }
     @RequestMapping(value="/categories", method = RequestMethod.GET)
     public List<Category> list(){
+    	Authentication auth=SecurityContextHolder.getContext().getAuthentication();
         return categoryService.findAll();
     }
 

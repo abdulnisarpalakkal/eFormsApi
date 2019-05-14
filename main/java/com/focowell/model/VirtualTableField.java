@@ -28,7 +28,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.focowell.model.deserializer.VirtualTableFieldDeserializer;
 
 @Entity  
-@Table(name="virtual_table_fields",indexes= {@Index(name="virtual_table_master_index",columnList="virtual_table_master_id",unique=false)})
+@Table(name="virtual_table_fields"
+//,indexes= {@Index(name="virtual_table_master_index",columnList="virtual_table_master_id",unique=false)}
+)
 @JsonDeserialize(using = VirtualTableFieldDeserializer.class)
 
 public class VirtualTableField implements Serializable {

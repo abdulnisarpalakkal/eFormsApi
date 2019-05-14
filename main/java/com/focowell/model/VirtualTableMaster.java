@@ -32,7 +32,7 @@ public class VirtualTableMaster implements Serializable {
 	@Id  
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator = "v_table_master_seq")
     @SequenceGenerator(name = "v_table_master_seq",allocationSize = 1, sequenceName = "DB_V_TABLE_MASTER_SEQ")
-    private long id;
+	private long id;
 	
 	@NotEmpty
 	@Column(name="TABLE_NAME", nullable=false)

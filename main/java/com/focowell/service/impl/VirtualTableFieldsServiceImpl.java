@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 
 import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.dao.VirtualTableFieldsDao;
-import com.focowell.model.VirtualTableFieldDataType;
 import com.focowell.model.VirtualTableField;
+import com.focowell.model.VirtualTableFieldDataType;
 import com.focowell.service.VirtualTableFieldsService;
 
 @Service(value = "virtualTableFieldsService")

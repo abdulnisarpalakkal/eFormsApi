@@ -1,8 +1,8 @@
 package com.focowell.controller;
 
 import com.focowell.config.error.AlreadyExistsException;
-import com.focowell.model.VirtualTableField;
 import com.focowell.model.User;
+import com.focowell.model.VirtualTableField;
 import com.focowell.model.VirtualTableFieldDataType;
 import com.focowell.model.dto.UserDto;
 import com.focowell.service.VirtualTableFieldsService;

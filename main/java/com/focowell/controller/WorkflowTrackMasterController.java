@@ -29,8 +29,7 @@ public class WorkflowTrackMasterController {
     @Autowired
     private WorkflowTrackMasterService workflowTrackMasterService;
     
-    @Autowired
-    private UserService userService;
+ 
 
     @RequestMapping(value="/workflowTrackMasters", method = RequestMethod.POST)
     public WorkflowTrackMaster create(@RequestBody WorkflowTrackMaster workflowTrackMaster) throws AlreadyExistsException{

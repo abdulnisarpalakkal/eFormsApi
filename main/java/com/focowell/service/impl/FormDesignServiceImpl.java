@@ -18,6 +18,8 @@ import com.focowell.model.FormDesign;
 import com.focowell.model.FormRule;
 import com.focowell.model.VirtualTableConstraintType;
 import com.focowell.model.VirtualTableConstraints;
+import com.focowell.model.VirtualTableField;
+import com.focowell.model.VirtualTableFieldDataType;
 import com.focowell.model.dto.FormDesignDto;
 import com.focowell.service.FormDesignService;
 import com.focowell.service.FormRuleService;
@@ -170,6 +172,27 @@ public class FormDesignServiceImpl implements FormDesignService {
 			formDesign.setComponentType(FormComponentType.COMPO);
 		}
 	}
-	
+	@Override
+	public List<FormDesign> getFormDesignFromTableFields(List<VirtualTableField> fields){
+		List<FormDesign> formDesigns=null;
+		
+		if(fields!=null) {
+			int index=0;
+			formDesigns=new ArrayList<>();
+			for(VirtualTableField field:fields){
+				FormDesign design=new FormDesign(field.getFieldName(),field.getFieldName(),FormComponentType.TEXT,index++,field);
+				if(field.getFieldDataType()==VirtualTableFieldDataType.DATE)
+					design.setComponentType(FormComponentType.DATE);
+				if(field.getFieldDataType()==VirtualTableFieldDataType.BLOB)
+					design.setComponentType(FormComponentType.FILE);
+				else
+					populateRefValuesIfForeignKey(design);
+				
+				formDesigns.add(design);
+			}
+		}
+		
+		return formDesigns;
+	}
 	
 }

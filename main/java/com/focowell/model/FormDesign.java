@@ -1,5 +1,7 @@
 package com.focowell.model;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -18,10 +20,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity  
 @Table(name="form_design")
@@ -36,7 +41,7 @@ public class FormDesign {
 		this.componentLabel=componentLabel;
 		this.componentType=componentType;
 		this.alignOrder=alignOrder;
-		this.componentRefValues=componentRefValues;
+//		this.componentRefValues=componentRefValues;
 		this.virtualTableField=virtualTableField;
 		
 	}
@@ -86,6 +91,11 @@ public class FormDesign {
 			inverseJoinColumns= {@JoinColumn(name="form_rule_id")})
 	private Set<FormRule> formRules;
 
+	@Transient
+	@JsonSerialize
+	@JsonDeserialize
+	List<Map<String,VirtualTableRecords>> gridRecords;
+	
 	public long getId() {
 		return id;
 	}
@@ -174,6 +184,12 @@ public class FormDesign {
 
 	public void setFormRules(Set<FormRule> formRules) {
 		this.formRules = formRules;
+	}
+	public List<Map<String, VirtualTableRecords>> getGridRecords() {
+		return gridRecords;
+	}
+	public void setGridRecords(List<Map<String, VirtualTableRecords>> gridRecords) {
+		this.gridRecords = gridRecords;
 	}
 
 	

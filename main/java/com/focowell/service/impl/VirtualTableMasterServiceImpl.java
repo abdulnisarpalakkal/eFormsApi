@@ -1,12 +1,9 @@
 package com.focowell.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -14,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.focowell.config.error.AlreadyExistsException;
-import com.focowell.dao.VirtualTableConstraintsDao;
 import com.focowell.dao.VirtualTableMasterDao;
+import com.focowell.model.VirtualTableConstraintType;
 import com.focowell.model.VirtualTableConstraints;
 import com.focowell.model.VirtualTableField;
 import com.focowell.model.VirtualTableMaster;
@@ -25,8 +22,6 @@ import com.focowell.model.dto.VirtualTableFieldsConstraintDto;
 import com.focowell.service.VirtualTableConstraintsService;
 import com.focowell.service.VirtualTableFieldsService;
 import com.focowell.service.VirtualTableMasterService;
-
-import antlr.ASdebug.TokenOffsetInfo;
 
 @Service(value = "virtualTableMasterService")
 public class VirtualTableMasterServiceImpl implements VirtualTableMasterService {
@@ -68,6 +63,37 @@ public class VirtualTableMasterServiceImpl implements VirtualTableMasterService 
 		return virtualTableMasterDao.findByIdJPQL(id).get();
 	}
 
+	/*
+	 * this for listing all tables in same process for setting foreign key
+	 */
+	@Override
+	public VirtualTableFKConstraintRefDto findVirtualTableConstraintRefData(long processId) {
+		VirtualTableFKConstraintRefDto virtualTableConstraintRefDto=new VirtualTableFKConstraintRefDto();
+		List<VirtualTableMaster> refTables=new ArrayList<VirtualTableMaster>();
+		List<VirtualTableConstraints> refPkConstraints=new  ArrayList<VirtualTableConstraints>();
+		
+		virtualTableMasterDao.findAllByProcess_Id(processId).iterator().forEachRemaining(refTables::add);
+		virtualTableConstraintsService.findAllByVirtualTableFieldByProcess(processId).iterator().forEachRemaining(refPkConstraints::add);
+		
+		virtualTableConstraintRefDto.setRefPkConstraints(refPkConstraints);
+		virtualTableConstraintRefDto.setRefTables(refTables);
+		
+		return virtualTableConstraintRefDto;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.focowell.service.VirtualTableMasterService#save(com.focowell.model.VirtualTableMaster)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<VirtualTableMaster> findAllTablesReferringMe(long tableId){
+		List<VirtualTableMaster> referTablelist = new ArrayList<>();
+		virtualTableMasterDao.findAllTablesReferringMeJPQL(VirtualTableConstraintType.FOREIGN_KEY,tableId).iterator().forEachRemaining(referTablelist::add);
+		referTablelist.forEach(referTable->referTable.setVirtualTableFieldsList(new HashSet<VirtualTableField>(virtualTableFieldsService.findAllByTableId(referTable.getId()))));
+		return referTablelist;
+		
+	}
 	@Override
 	public VirtualTableMaster save(VirtualTableMaster virtualTableMaster) throws AlreadyExistsException {
 		if(virtualTableMasterExist(virtualTableMaster.getTableName()))
@@ -140,21 +166,6 @@ public class VirtualTableMasterServiceImpl implements VirtualTableMasterService 
         }
         return false;
     }
-	
-	@Override
-	public VirtualTableFKConstraintRefDto findVirtualTableConstraintRefData(long processId) {
-		VirtualTableFKConstraintRefDto virtualTableConstraintRefDto=new VirtualTableFKConstraintRefDto();
-		List<VirtualTableMaster> refTables=new ArrayList<VirtualTableMaster>();
-		List<VirtualTableConstraints> refPkConstraints=new  ArrayList<VirtualTableConstraints>();
-		
-		virtualTableMasterDao.findAllByProcess_Id(processId).iterator().forEachRemaining(refTables::add);
-		virtualTableConstraintsService.findAllByVirtualTableFieldByProcess(processId).iterator().forEachRemaining(refPkConstraints::add);
-		
-		virtualTableConstraintRefDto.setRefPkConstraints(refPkConstraints);
-		virtualTableConstraintRefDto.setRefTables(refTables);
-		
-		return virtualTableConstraintRefDto;
-	}
 	
 	
 	@Override

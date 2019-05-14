@@ -16,13 +16,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.LongNode;
-import com.focowell.model.WorkflowMaster;
-import com.focowell.model.WorkflowNode;
 import com.focowell.model.FormDesign;
 import com.focowell.model.VirtualTableConstraints;
 import com.focowell.model.VirtualTableField;
 import com.focowell.model.VirtualTableFieldDataType;
 import com.focowell.model.VirtualTableMaster;
+import com.focowell.model.WorkflowMaster;
+import com.focowell.model.WorkflowNode;
 import com.focowell.model.WorkflowTrackDet;
 
 public class VirtualTableFieldDeserializer extends StdDeserializer<VirtualTableField> {

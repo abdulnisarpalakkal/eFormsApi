@@ -32,6 +32,7 @@ public class UserDto {
 	    private String lastName;
 	    private String email;
 	    private Set<UserRoles> userRoles = new HashSet<UserRoles>();
+	    private String tenantId;
 
 
 	    public long getId() {
@@ -88,6 +89,14 @@ public class UserDto {
 
 		public void setUserRoles(Set<UserRoles> userRoles) {
 			this.userRoles = userRoles;
+		}
+
+		public String getTenantId() {
+			return tenantId;
+		}
+
+		public void setTenantId(String tenantId) {
+			this.tenantId = tenantId;
 		}
 
 	

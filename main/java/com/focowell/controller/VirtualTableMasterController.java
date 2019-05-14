@@ -1,15 +1,15 @@
 package com.focowell.controller;
 
 import com.focowell.config.error.AlreadyExistsException;
+import com.focowell.model.FormMaster;
+import com.focowell.model.User;
+import com.focowell.model.VirtualTableField;
 import com.focowell.model.VirtualTableMaster;
 import com.focowell.model.VirtualTableRecords;
 import com.focowell.model.dto.UserDto;
 import com.focowell.model.dto.VirtualTableFKConstraintRefDto;
 import com.focowell.model.dto.VirtualTableFieldsConstraintDto;
 import com.focowell.model.dto.VirtualTableRecordForGridDto;
-import com.focowell.model.FormMaster;
-import com.focowell.model.User;
-import com.focowell.model.VirtualTableField;
 import com.focowell.service.VirtualTableMasterService;
 import com.focowell.service.VirtualTableRecordsService;
 import com.focowell.service.UserService;
@@ -71,6 +71,12 @@ public class VirtualTableMasterController {
     public VirtualTableMaster getOne(@PathVariable(value = "id") Long id){
         return virtualTableMasterService.findById(id);
     }
+    @RequestMapping(value = "/virtualTableMaster/tablesReferringMe/{id}", method = RequestMethod.GET)
+    public List<VirtualTableMaster> getAllTablesReferringMe(@PathVariable(value = "id") Long tableId){
+        return virtualTableMasterService.findAllTablesReferringMe(tableId);
+    }
+    
+    
     @RequestMapping(value = "/virtualTableMaster/{id}", method = RequestMethod.DELETE)
     public void deleteOne(@PathVariable(value = "id") Long id){
     	virtualTableMasterService.delete(id);

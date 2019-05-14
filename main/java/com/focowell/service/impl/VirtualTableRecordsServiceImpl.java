@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 
 import com.focowell.config.error.AlreadyExistsException;
@@ -23,7 +22,6 @@ import com.focowell.model.FormDesign;
 import com.focowell.model.FormMaster;
 import com.focowell.model.VirtualTableConstraintType;
 import com.focowell.model.VirtualTableField;
-import com.focowell.model.VirtualTableFieldDataType;
 import com.focowell.model.VirtualTableRecords;
 import com.focowell.model.dto.VirtualTableRecordForGridDto;
 import com.focowell.service.FileService;
@@ -126,27 +124,7 @@ public class VirtualTableRecordsServiceImpl implements VirtualTableRecordsServic
 		return refValueList;
 	}
 
-	private List<FormDesign> getFormDesignFromTableFields(List<VirtualTableField> fields){
-		List<FormDesign> formDesigns=null;
-		
-		if(fields!=null) {
-			int index=0;
-			formDesigns=new ArrayList<>();
-			for(VirtualTableField field:fields){
-				FormDesign design=new FormDesign(field.getFieldName(),field.getFieldName(),FormComponentType.TEXT,index++,field);
-				if(field.getFieldDataType()==VirtualTableFieldDataType.DATE)
-					design.setComponentType(FormComponentType.DATE);
-				if(field.getFieldDataType()==VirtualTableFieldDataType.BLOB)
-					design.setComponentType(FormComponentType.FILE);
-				else
-					formDesignService.populateRefValuesIfForeignKey(design);
-				
-				formDesigns.add(design);
-			}
-		}
-		
-		return formDesigns;
-	}
+	
 	 
 	@Override
 	public VirtualTableRecordForGridDto findAllByTableForGrid(long tableId) {
@@ -154,7 +132,7 @@ public class VirtualTableRecordsServiceImpl implements VirtualTableRecordsServic
 		recordsForGrid.setRecords(findAllRecordsByTable(tableId));
 		
 		recordsForGrid.setColumns(virtualTableFieldsService.findAllByTableId(tableId));
-		recordsForGrid.setFormDesigns(getFormDesignFromTableFields(recordsForGrid.getColumns()));
+		recordsForGrid.setFormDesigns(formDesignService.getFormDesignFromTableFields(recordsForGrid.getColumns()));
 		return recordsForGrid;
 	}
 	
@@ -240,6 +218,7 @@ public class VirtualTableRecordsServiceImpl implements VirtualTableRecordsServic
         return false;
     }
 	@Override
+	@Transactional
 	public long saveVirtualRecordsFromForm(FormMaster form) throws Exception {
 		
 		Set<VirtualTableRecords> virtualTableRecords=new HashSet<VirtualTableRecords>();
@@ -269,7 +248,17 @@ public class VirtualTableRecordsServiceImpl implements VirtualTableRecordsServic
 			record.setPkValue(pkValue);
 			virtualTableRecords.add(record);
 		}
+		
 		saveAll(virtualTableRecords);
+		
+		for(FormDesign formDesign:form.getFormDesignList().stream().filter(design->design.getComponentType()==FormComponentType.GRID).collect(Collectors.toList()))
+		{
+//			for(VirtualTableRecords childRecord:formDesign.getGridRecords()) {
+//				if(childRecord.getPkValue()==0){
+//					
+//				}
+//			}
+		}
 		return pkValue;
 	}
 	

@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.focowell.config.error.AlreadyExistsException;
-import com.focowell.model.VirtualTableFieldDataType;
 import com.focowell.model.VirtualTableField;
+import com.focowell.model.VirtualTableFieldDataType;
 
 public interface VirtualTableFieldsService {
 	    List<VirtualTableField> findAll();

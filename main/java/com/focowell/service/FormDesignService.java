@@ -5,6 +5,7 @@ import java.util.List;
 import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.model.FormComponentType;
 import com.focowell.model.FormDesign;
+import com.focowell.model.VirtualTableField;
 import com.focowell.model.dto.FormDesignDto;
 
 public interface FormDesignService {
@@ -20,4 +21,5 @@ public interface FormDesignService {
 		List<FormComponentType> findAllFormComponentTypes();
 		List<FormDesign> findAllFormComponentsByFormId(Long formId);
 		void populateRefValuesIfForeignKey(FormDesign formDesign);
+		List<FormDesign> getFormDesignFromTableFields(List<VirtualTableField> fields);
 }

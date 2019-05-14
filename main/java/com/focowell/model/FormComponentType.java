@@ -8,7 +8,8 @@ public enum FormComponentType {
     DATE("DATE"),
     LABEL("LABEL"),
 	FILE("FILE"),
-	IMG("IMG");
+	IMG("IMG"),
+	GRID("GRID");
    
 
     private final String componentType;

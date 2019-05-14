@@ -21,4 +21,5 @@ public interface VirtualTableMasterService {
 				throws AlreadyExistsException;
 		VirtualTableMaster update(VirtualTableFieldsConstraintDto virtualTableFieldsConstraintDto)
 				throws AlreadyExistsException;
+		List<VirtualTableMaster> findAllTablesReferringMe(long tableId);
 }
