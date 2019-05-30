@@ -7,14 +7,15 @@ import com.focowell.model.FormDesign;
 import com.focowell.model.VirtualTableField;
 
 public class VirtualTableRecordForGridDto {
-	List<Map> records;
+	List<VirtualRowRecordsDto> rowRecords;
 	List<VirtualTableField> columns;
 	List<FormDesign> formDesigns;
-	public List<Map> getRecords() {
-		return records;
+	
+	public List<VirtualRowRecordsDto> getRowRecords() {
+		return rowRecords;
 	}
-	public void setRecords(List<Map> records) {
-		this.records = records;
+	public void setRowRecords(List<VirtualRowRecordsDto> rowRecords) {
+		this.rowRecords = rowRecords;
 	}
 	public List<VirtualTableField> getColumns() {
 		return columns;

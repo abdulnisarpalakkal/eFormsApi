@@ -98,9 +98,9 @@ public class VirtualTableField implements Serializable {
 //	@OneToMany( mappedBy="refVirtualTableField" ,fetch=FetchType.LAZY)
 //	public Set<VirtualTableConstraints> refConstraintList; //foreign key
 
-	@JsonIgnoreProperties(value="virtualTableFields",allowSetters=true)
-	@OneToMany( mappedBy="virtualTableFields" ,fetch=FetchType.LAZY, cascade=CascadeType.REMOVE,orphanRemoval=true)
-	public Set<VirtualTableRecords> virtualTableRecords;
+//	@JsonIgnoreProperties(value="virtualTableFields",allowSetters=true)
+//	@OneToMany( mappedBy="virtualTableFields" ,fetch=FetchType.LAZY, cascade=CascadeType.REMOVE,orphanRemoval=true)
+//	public Set<VirtualTableRecords> virtualTableRecords;
 	
 	public long getId() {
 		return id;
@@ -188,13 +188,6 @@ public class VirtualTableField implements Serializable {
 //		this.refConstraintList = refConstraintList;
 //	}
 
-	public Set<VirtualTableRecords> getVirtualTableRecords() {
-		return virtualTableRecords;
-	}
-
-	public void setVirtualTableRecords(Set<VirtualTableRecords> virtualTableRecords) {
-		this.virtualTableRecords = virtualTableRecords;
-	}
 
 
 

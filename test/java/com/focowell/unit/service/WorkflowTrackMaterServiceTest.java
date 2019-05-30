@@ -21,7 +21,6 @@ import com.focowell.service.FormDesignService;
 import com.focowell.service.UserRolesService;
 import com.focowell.service.UserService;
 import com.focowell.service.VirtualTableFieldsService;
-import com.focowell.service.VirtualTableRecordsService;
 import com.focowell.service.VirtualTableSequenceService;
 import com.focowell.service.WorkflowLinkService;
 import com.focowell.service.WorkflowMasterService;
@@ -99,8 +98,7 @@ public class WorkflowTrackMaterServiceTest {
 	@MockBean
 	VirtualTableSequenceService virtualTableSequenceService;
 	
-	@MockBean
-	VirtualTableRecordsService virtualTableRecordsService;
+
 	
 	@MockBean
 	VirtualTableFieldsService virtualTableFieldsService;

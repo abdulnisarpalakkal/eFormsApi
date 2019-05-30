@@ -21,25 +21,25 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@Entity  
-@Table(name="virtual_table_records")
+//@Entity  
+//@Table(name="virtual_table_records")
 
 public class VirtualTableRecords implements Serializable {
-	@Id  
-    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator = "v_table_records_seq")
-    @SequenceGenerator(name = "v_table_records_seq", sequenceName = "DB_V_TABLE_RECORD_SEQ")
+//	@Id  
+//    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator = "v_table_records_seq")
+//    @SequenceGenerator(name = "v_table_records_seq", sequenceName = "DB_V_TABLE_RECORD_SEQ")
     private long id;
 	
 	
 	
-	@Column(name="STRING_VALUE")
+//	@Column(name="STRING_VALUE")
     private String stringValue;
 	
-	@Column(name="PK_VALUE")
+//	@Column(name="PK_VALUE")
     private long pkValue;
 	
-	@JsonIgnoreProperties(value="virtualTableRecords",allowSetters=true)	
-	@ManyToOne(fetch=FetchType.EAGER)    
+//	@JsonIgnoreProperties(value="virtualTableRecords",allowSetters=true)	
+//	@ManyToOne(fetch=FetchType.EAGER)    
 	private VirtualTableField virtualTableFields;
 
 

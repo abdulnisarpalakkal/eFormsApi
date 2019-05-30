@@ -1,31 +1,26 @@
 package com.focowell.controller;
 
-import com.focowell.config.error.AlreadyExistsException;
-import com.focowell.model.FormMaster;
-import com.focowell.model.User;
-import com.focowell.model.VirtualTableField;
-import com.focowell.model.VirtualTableMaster;
-import com.focowell.model.VirtualTableRecords;
-import com.focowell.model.dto.UserDto;
-import com.focowell.model.dto.VirtualTableFKConstraintRefDto;
-import com.focowell.model.dto.VirtualTableFieldsConstraintDto;
-import com.focowell.model.dto.VirtualTableRecordForGridDto;
-import com.focowell.service.VirtualTableMasterService;
-import com.focowell.service.VirtualTableRecordsService;
-import com.focowell.service.UserService;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.focowell.config.error.AlreadyExistsException;
+import com.focowell.model.FormMaster;
+import com.focowell.model.VirtualTableMaster;
+import com.focowell.model.dto.VirtualRowRecordsDto;
+import com.focowell.model.dto.VirtualTableFKConstraintRefDto;
+import com.focowell.model.dto.VirtualTableFieldsConstraintDto;
+import com.focowell.model.dto.VirtualTableRecordForGridDto;
+import com.focowell.service.UserService;
+import com.focowell.service.VirtualTableMasterService;
+import com.focowell.service.VirtualTableRecordsMongoService;
 
 //@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
 @RestController
@@ -35,7 +30,7 @@ public class VirtualTableMasterController {
     @Autowired
     private VirtualTableMasterService virtualTableMasterService;
     @Autowired
-    private VirtualTableRecordsService virtualTableRecordsService;
+    private VirtualTableRecordsMongoService virtualTableRecordsService;
     
     @Autowired
     private UserService userService;
@@ -97,13 +92,13 @@ public class VirtualTableMasterController {
         return virtualTableRecordsService.findAllByTableForGrid(tableId);
     }
     @RequestMapping(value="/virtualTableMaster/records", method = RequestMethod.POST)
-    public List<VirtualTableRecords> addOneRowRecordAfterCheckPkValue(@RequestBody List<VirtualTableRecords> records) throws Exception {
-        return virtualTableRecordsService.saveOneRowRecordAfterCheckPkValue(records);
+    public VirtualRowRecordsDto addOneRowRecordAfterCheckPkValue(@RequestBody VirtualRowRecordsDto virtualRowRecordsDto) throws Exception {
+        return virtualTableRecordsService.saveOneRowRecordAfterCheckPkValue(virtualRowRecordsDto);
     }
     
     @RequestMapping(value="/virtualTableMaster/records/form", method = RequestMethod.POST)
     public long addOneRowRecordAfterCheckPkValueFromForm(@RequestBody FormMaster formMaster) throws Exception {
-        return virtualTableRecordsService.saveVirtualRecordsFromForm(formMaster);
+        return virtualTableRecordsService.saveVirtualRecordsFromForm(formMaster).getPkValue();
     }
     
     @RequestMapping(value="/virtualTableMaster/records/{tableId}/{pkValue}", method = RequestMethod.DELETE)

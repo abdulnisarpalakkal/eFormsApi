@@ -2,20 +2,16 @@ package com.focowell.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.dao.FormDesignDao;
-import com.focowell.dao.FormRuleDao;
 import com.focowell.model.FormComponentRefValue;
 import com.focowell.model.FormComponentType;
 import com.focowell.model.FormDesign;
-import com.focowell.model.FormRule;
 import com.focowell.model.VirtualTableConstraintType;
 import com.focowell.model.VirtualTableConstraints;
 import com.focowell.model.VirtualTableField;
@@ -25,7 +21,7 @@ import com.focowell.service.FormDesignService;
 import com.focowell.service.FormRuleService;
 import com.focowell.service.FormRuleTypeService;
 import com.focowell.service.VirtualTableFieldsService;
-import com.focowell.service.VirtualTableRecordsService;
+import com.focowell.service.VirtualTableRecordsMongoService;
 
 @Service(value = "formDesignService")
 public class FormDesignServiceImpl implements FormDesignService {
@@ -43,7 +39,7 @@ public class FormDesignServiceImpl implements FormDesignService {
     private FormRuleTypeService formRuleTypeService;
     
     @Autowired
-	private VirtualTableRecordsService virtualTableRecordsService;
+	private VirtualTableRecordsMongoService virtualTableRecordsService;
 	
 	
 	

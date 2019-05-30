@@ -22,7 +22,6 @@ import org.springframework.web.filter.CorsFilter;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.focowell.datasource.CustomRoutingDataSource;
-import com.focowell.datasource.MasterService;
 import com.focowell.service.TenantDBService;
 
 @SpringBootApplication( exclude = { 

@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.focowell.model.dto.VirtualRowRecordsDto;
 
 @Entity  
 @Table(name="form_master")
@@ -84,7 +85,7 @@ public class FormMaster {
 	@Transient
 	@JsonSerialize
 	@JsonDeserialize 
-	private Set<VirtualTableRecords> VirtualTableRecords;
+	private VirtualRowRecordsDto virtualRowRecordsDto;
 	
 	
 
@@ -160,12 +161,14 @@ public class FormMaster {
 		this.workflowNodeList = workflowNodeList;
 	}
 
-	public Set<VirtualTableRecords> getVirtualTableRecords() {
-		return VirtualTableRecords;
+	
+
+	public VirtualRowRecordsDto getVirtualRowRecordsDto() {
+		return virtualRowRecordsDto;
 	}
 
-	public void setVirtualTableRecords(Set<VirtualTableRecords> virtualTableRecords) {
-		VirtualTableRecords = virtualTableRecords;
+	public void setVirtualRowRecordsDto(VirtualRowRecordsDto virtualRowRecordsDto) {
+		this.virtualRowRecordsDto = virtualRowRecordsDto;
 	}
 
 	public Set<FormRule> getFormRules() {

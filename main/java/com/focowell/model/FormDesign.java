@@ -47,7 +47,7 @@ public class FormDesign {
 	}
 	@Id  
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator = "form_design_seq")
-    @SequenceGenerator(name = "form_design_seq",allocationSize = 1, sequenceName = "DB_FORM_DESIGN_SEQ")
+    @SequenceGenerator(name = "form_design_seq",initialValue=101,allocationSize = 1, sequenceName = "DB_FORM_DESIGN_SEQ")
     private long id;
 	
 	@NotEmpty

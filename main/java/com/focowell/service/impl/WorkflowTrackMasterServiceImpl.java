@@ -2,41 +2,30 @@ package com.focowell.service.impl;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.focowell.config.error.StorageException;
 import com.focowell.dao.WorkflowTrackMasterDao;
-import com.focowell.model.FormComponentRefValue;
 import com.focowell.model.FormComponentType;
 import com.focowell.model.FormDesign;
 import com.focowell.model.FormMaster;
 import com.focowell.model.User;
 import com.focowell.model.UserRoles;
-import com.focowell.model.VirtualTableConstraintType;
-import com.focowell.model.VirtualTableConstraints;
-import com.focowell.model.VirtualTableField;
 import com.focowell.model.VirtualTableRecords;
 import com.focowell.model.WorkflowLink;
 import com.focowell.model.WorkflowMaster;
@@ -45,11 +34,12 @@ import com.focowell.model.WorkflowNodeType;
 import com.focowell.model.WorkflowStage;
 import com.focowell.model.WorkflowTrackDet;
 import com.focowell.model.WorkflowTrackMaster;
+import com.focowell.model.dto.VirtualRowRecordsDto;
 import com.focowell.service.FileService;
 import com.focowell.service.FormDesignService;
 import com.focowell.service.UserService;
 import com.focowell.service.VirtualTableFieldsService;
-import com.focowell.service.VirtualTableRecordsService;
+import com.focowell.service.VirtualTableRecordsMongoService;
 import com.focowell.service.VirtualTableSequenceService;
 import com.focowell.service.WorkflowLinkService;
 import com.focowell.service.WorkflowMasterService;
@@ -72,7 +62,7 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 	private VirtualTableSequenceService virtualTableSequenceService;
 	
 	@Autowired
-	private VirtualTableRecordsService virtualTableRecordsService;
+	private VirtualTableRecordsMongoService virtualTableRecordsService;
 	
 	@Autowired
 	private VirtualTableFieldsService virtualTableFieldService;
@@ -210,9 +200,9 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 			Hibernate.initialize(formNode.getFormMaster().getFormDesignList()); //lazy initialization of form design
 			boolean isWorkflowStarting=workflowStage.getWorkflowTrackDet()==null;
 			if(!isWorkflowStarting ) {  //if it is not start form then fetch data that is submitted previously
-				formNode.getFormMaster().setVirtualTableRecords(
-						virtualTableRecordsService.findAllByTableAndPk(formNode.getFormMaster().getVirtualTableMaster().getId(),workflowStage.getWorkflowTrackDet().getWorkflowTrackMaster().getDataId()));
-				setValuesToForm(formNode.getFormMaster().getVirtualTableRecords(), formNode.getFormMaster().getFormDesignList());	 //setting form value if form is view
+				formNode.getFormMaster().setVirtualRowRecordsDto(
+						virtualTableRecordsService.findRowByTableAndPk(formNode.getFormMaster().getVirtualTableMaster().getId(),workflowStage.getWorkflowTrackDet().getWorkflowTrackMaster().getDataId()));
+				setValuesToForm(formNode.getFormMaster().getVirtualRowRecordsDto().getRecords(), formNode.getFormMaster().getFormDesignList());	 //setting form value if form is view
 			}
 			
 			formNode.getFormMaster().getFormDesignList().forEach(design->{
@@ -256,7 +246,7 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 		return formNode;
 	}
 	
-	private void setValuesToForm(Set<VirtualTableRecords> records, Set<FormDesign> designList) {
+	private void setValuesToForm(List<VirtualTableRecords> records, Set<FormDesign> designList) {
 		if(records!=null) { //setting form value if form is view
 			designList.forEach(design->{
 				final Optional<String> val=records.stream()
@@ -317,7 +307,8 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 		}
 								
 		if(isWorkflowStarting) { 	// if it is start of workflow, then workflowTrackMaster need to be saved
-			pkValue=virtualTableRecordsService.saveVirtualRecordsFromForm(WorkflowStage.getFormNode().getFormMaster()); //Saving form data
+			VirtualRowRecordsDto savedVirtualRowRecordsDto=virtualTableRecordsService.saveVirtualRecordsFromForm(WorkflowStage.getFormNode().getFormMaster()); //Saving form data
+			pkValue=savedVirtualRowRecordsDto.getPkValue();
 			WorkflowTrackMaster childWorkflowTrack=initiateChildWorkflow(nextLink,childWorkflow,user,pkValue);
 			initiateWorkflow(user,WorkflowStage.getWorkflowMaster(),pkValue,nextLink,currentWorkflowNode,childWorkflowTrack);
 			
@@ -328,7 +319,8 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 			workflowTrackMaster=findById(WorkflowStage.getWorkflowTrackDet().getWorkflowTrackMaster().getId()); //find track master if it is not first stage
 			workflowTrackMaster.getWorkflowTrackDetList().size(); //initialize existing track records
 		
-			pkValue=virtualTableRecordsService.updateVirtualRecordsFromForm(WorkflowStage.getFormNode().getFormMaster(),workflowTrackMaster.getDataId()); //Updating form data
+			VirtualRowRecordsDto savedVirtualRowRecordsDto=virtualTableRecordsService.updateVirtualRecordsFromForm(WorkflowStage.getFormNode().getFormMaster(),workflowTrackMaster.getDataId()); //Updating form data
+			pkValue=savedVirtualRowRecordsDto.getPkValue();
 			WorkflowTrackMaster childWorkflowTrack=initiateChildWorkflow(nextLink,childWorkflow,user,pkValue);
 			
 			updateWorkflow(user,workflowTrackMaster,pkValue,nextLink,currentWorkflowNode,childWorkflowTrack);
@@ -395,9 +387,9 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 		}
 		
 		if(pkValue==0) 
-			return virtualTableRecordsService.saveVirtualRecordsFromForm(form);
+			return virtualTableRecordsService.saveVirtualRecordsFromForm(form).getPkValue();
 	
-		return virtualTableRecordsService.updateVirtualRecordsFromForm(form,pkValue);
+		return virtualTableRecordsService.updateVirtualRecordsFromForm(form,pkValue).getPkValue();
 			
 	}
 	
