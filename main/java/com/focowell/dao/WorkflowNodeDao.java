@@ -10,7 +10,7 @@ import com.focowell.model.WorkflowNode;
 
 @Repository
 public interface WorkflowNodeDao extends CrudRepository<WorkflowNode, Long> {
-	@Query("SELECT v FROM WorkflowNode v left join fetch v.formMaster f left join fetch v.actionEventObjects a  left join fetch v.workflowMaster w where w.id=:workflowId ")
+	@Query("SELECT v FROM WorkflowNode v left join fetch v.formMaster f left join fetch v.actionEventObjects a  left join fetch v.workflowMaster w left join fetch v.childWorkflow where w.id=:workflowId ")
 	Iterable<WorkflowNode> findAllByWorkflowIdJPQL(@Param("workflowId") long workflowId);
 	
 	Iterable<WorkflowNode> findAllByWorkflowMaster_Id( long workflowId);
