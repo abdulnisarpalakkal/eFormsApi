@@ -97,29 +97,29 @@ public class VirtualTableRecordsMongoServiceImpl implements VirtualTableRecordsM
 	}
 	
 	@Override
-	public  List<VirtualRowRecordsDto> findAllRowsByTableAndPk(long tableId,long pkValue) {
+	public  VirtualRowRecordsDto findAllRowsByTableAndPk(long tableId,long pkValue) {
 		
 		
 		
-		 List<VirtualRowRecordsDto> virtualRowRecordsDtoList = new ArrayList<>();
+		 VirtualRowRecordsDto virtualRowRecordsDto =null;
 		 HttpEntity<String> entity = new HttpEntity<String>(null, getHeaders());
 		 Map<String, String> urlVariables=new HashMap<>();
 		 urlVariables.put("tableId", Long.toString(tableId));
 		 urlVariables.put("pkValue", Long.toString(pkValue));
 		 
 //	 	urlVariables.put("id", 1L);
-		 ResponseEntity<List<VirtualRowRecordsDto>> response=restTemplate.exchange(
+		 ResponseEntity<VirtualRowRecordsDto> response=restTemplate.exchange(
 	  	          createURLWithPort("/row/records/tableId/pk/{tableId}/{pkValue}"), HttpMethod.GET, entity
-	  	          , new ParameterizedTypeReference<List<VirtualRowRecordsDto>>(){},urlVariables);
-		virtualRowRecordsDtoList=response.getBody();
-		return virtualRowRecordsDtoList;
+	  	          , VirtualRowRecordsDto.class,urlVariables);
+		 virtualRowRecordsDto=response.getBody();
+		return virtualRowRecordsDto;
 	}
 	@Override
 	public VirtualRowRecordsDto findRowByTableAndPk(long tableId,long pkValue) {
-		List<VirtualRowRecordsDto> existRows=findAllRowsByTableAndPk(tableId,pkValue);
-		if(existRows==null || existRows.isEmpty())
+		VirtualRowRecordsDto existRow=findAllRowsByTableAndPk(tableId,pkValue);
+		if(existRow==null || existRow.getId()==null)
 			return null;
-		return existRows.get(0);
+		return existRow;
 	}
 
 	@Override
@@ -224,8 +224,8 @@ public class VirtualTableRecordsMongoServiceImpl implements VirtualTableRecordsM
 
 	@Override
 	public VirtualRowRecordsDto update(VirtualRowRecordsDto virtualRowRecordsDto) throws NotFoundException {
-		List<VirtualRowRecordsDto> existingRows =findAllRowsByTableAndPk(virtualRowRecordsDto.getVirtualTableMaster().getId(), virtualRowRecordsDto.getPkValue());
-		if(existingRows==null || existingRows.isEmpty())
+		VirtualRowRecordsDto existingRow =findAllRowsByTableAndPk(virtualRowRecordsDto.getVirtualTableMaster().getId(), virtualRowRecordsDto.getPkValue());
+		if(existingRow==null)
 			throw new NotFoundException("Record not exist");
 		HttpEntity<VirtualRowRecordsDto> entity = new HttpEntity<VirtualRowRecordsDto>(virtualRowRecordsDto, getHeaders());
 		
@@ -236,8 +236,8 @@ public class VirtualTableRecordsMongoServiceImpl implements VirtualTableRecordsM
 	}
 	
 	private boolean virtualTableRowRecordsExist(long tableId, long pkValue) {
-        List<VirtualRowRecordsDto> existRows = findAllRowsByTableAndPk(tableId, pkValue);
-        if (existRows != null && existRows.size()!=0 ) {
+        VirtualRowRecordsDto existRow = findAllRowsByTableAndPk(tableId, pkValue);
+        if (existRow != null  ) {
             return true;
         }
         return false;
@@ -307,10 +307,10 @@ public class VirtualTableRecordsMongoServiceImpl implements VirtualTableRecordsM
 	public VirtualRowRecordsDto updateVirtualRecordsFromForm(FormMaster form,long pkValue) throws NotFoundException {
 		VirtualRowRecordsDto virtualRowRecordsDto=null;
 		virtualRowRecordsDto=new VirtualRowRecordsDto();
-		List<VirtualRowRecordsDto> existVirtualRowRecords=findAllRowsByTableAndPk(form.getVirtualTableMaster().getId(),pkValue);
-		if(existVirtualRowRecords==null || existVirtualRowRecords.isEmpty())
+		VirtualRowRecordsDto existVirtualRowRecord=findAllRowsByTableAndPk(form.getVirtualTableMaster().getId(),pkValue);
+		if(existVirtualRowRecord==null )
 			throw new NotFoundException("Record not found");
-		virtualRowRecordsDto=existVirtualRowRecords.get(0);
+		virtualRowRecordsDto=existVirtualRowRecord;
 		
 		
 		virtualRowRecordsDto.getRecords().forEach(record->{

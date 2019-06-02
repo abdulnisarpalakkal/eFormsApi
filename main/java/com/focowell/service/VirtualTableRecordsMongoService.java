@@ -15,7 +15,7 @@ import javassist.NotFoundException;
 
 public interface VirtualTableRecordsMongoService {
 	    List<VirtualRowRecordsDto> findAll();
-	    List<VirtualRowRecordsDto> findAllRowsByTableAndPk(long tableId, long pkValue);
+	    VirtualRowRecordsDto findAllRowsByTableAndPk(long tableId, long pkValue);
 	    VirtualRowRecordsDto findRowByTableAndPk(long tableId, long pkValue);
 		List<VirtualRowRecordsDto> findAllRowsByTable(long tableId);
 		Set<FormComponentRefValue> findAllFormComponentRefValueByTableAndFields(long tableId, String key,
