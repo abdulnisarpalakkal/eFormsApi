@@ -125,6 +125,11 @@ public class WorkflowTrackMaster {
 	public void setParentWorkflowTrackDetList(Set<WorkflowTrackDet> parentWorkflowTrackDetList) {
 		this.parentWorkflowTrackDetList = parentWorkflowTrackDetList;
 	}
+	@Override
+	public String toString() {
+		return "WorkflowTrackMaster [id=" + id + ", workflowMaster=" + workflowMaster + ", dataId=" + dataId
+				+ ", completed=" + completed + "]";
+	}
 
 //	@Override
 //	public int hashCode() {

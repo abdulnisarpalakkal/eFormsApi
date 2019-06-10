@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -47,6 +49,8 @@ import javassist.NotFoundException;
 @Service(value = "virtualTableRecordsMongoService")
 public class VirtualTableRecordsMongoServiceImpl implements VirtualTableRecordsMongoService {
 
+	private static final Logger logger = LogManager.getLogger(VirtualTableRecordsMongoServiceImpl.class);
+	
 	@Autowired
 	RestTemplate restTemplate;
 	
@@ -305,9 +309,11 @@ public class VirtualTableRecordsMongoServiceImpl implements VirtualTableRecordsM
 	}
 	@Override
 	public VirtualRowRecordsDto updateVirtualRecordsFromForm(FormMaster form,long pkValue) throws NotFoundException {
+		logger.debug("updateVirtualRecordsFromForm: entered form: "+form+", pkValue: "+pkValue);
 		VirtualRowRecordsDto virtualRowRecordsDto=null;
 		virtualRowRecordsDto=new VirtualRowRecordsDto();
 		VirtualRowRecordsDto existVirtualRowRecord=findAllRowsByTableAndPk(form.getVirtualTableMaster().getId(),pkValue);
+		logger.debug("updateVirtualRecordsFromForm: findAllRowsByTableAndPk: "+existVirtualRowRecord);
 		if(existVirtualRowRecord==null )
 			throw new NotFoundException("Record not found");
 		virtualRowRecordsDto=existVirtualRowRecord;
@@ -315,10 +321,13 @@ public class VirtualTableRecordsMongoServiceImpl implements VirtualTableRecordsM
 		
 		virtualRowRecordsDto.getRecords().forEach(record->{
 			String val=getFieldValueFromFormComponent(form.getFormDesignList(),record.getVirtualTableFields().getFieldName());
+			logger.debug("get value from component: field: "+record.getVirtualTableFields()+" value : "+val);
 			if(val!=null)
 				record.setStringValue(val);
 		});
-		return update(virtualRowRecordsDto);
+		virtualRowRecordsDto=update(virtualRowRecordsDto);
+		logger.debug("returning updateVirtualRecordsFromForm: virtualRowRecordsDto: "+virtualRowRecordsDto);
+		return virtualRowRecordsDto;
 		
 	}
 	

@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -20,6 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.focowell.EFormsApiApplication;
 import com.focowell.dao.WorkflowTrackMasterDao;
 import com.focowell.model.FormComponentType;
 import com.focowell.model.FormDesign;
@@ -48,7 +51,8 @@ import com.focowell.service.WorkflowTrackMasterService;
 
 @Service(value = "workflowTrackMasterService")
 public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterService {
-
+	private static final Logger logger = LogManager.getLogger(WorkflowTrackMasterServiceImpl.class);
+	
 	@Autowired
 	private WorkflowTrackMasterDao workflowTrackMasterDao;
 	
@@ -101,6 +105,7 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 
 	@Override
 	public WorkflowTrackMaster findById(Long id) {
+		
 		return workflowTrackMasterDao.findById(id).get();
 	}
 
@@ -283,6 +288,7 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 	@Override
 	@Transactional
 	public void submitAction(WorkflowStage WorkflowStage) throws Exception {
+		logger.debug("Entering submitAction workflow id: "+WorkflowStage.getWorkflowMaster().getId()+" ;  name: "+WorkflowStage.getWorkflowMaster().getWorkflowName());
 		Authentication auth=SecurityContextHolder.getContext().getAuthentication();
 		User user=userService.findOne(auth.getName());
 		
@@ -304,6 +310,7 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 			currentTargetNode=nextLink.getTargetNode();
 			currentWorkflowNode=nextLink.getTargetNode().getNodeType()==WorkflowNodeType.CHILD_WORKFLOW?currentTargetNode:currentSourceNode;
 			childWorkflow=nextLink.getTargetNode().getChildWorkflow();
+			logger.debug("submitAction: workflow id: "+WorkflowStage.getWorkflowMaster().getId()+" ,currentWorkflowNode id: "+currentWorkflowNode.getId()+" ;  currentTargetNode id: "+currentTargetNode.getId());
 		}
 								
 		if(isWorkflowStarting) { 	// if it is start of workflow, then workflowTrackMaster need to be saved
@@ -317,16 +324,20 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 			closeCurrentStage(WorkflowStage.getWorkflowTrackDet()); //closing the current stage
 			
 			workflowTrackMaster=findById(WorkflowStage.getWorkflowTrackDet().getWorkflowTrackMaster().getId()); //find track master if it is not first stage
+			logger.debug("submitAction: find workflowTrackMaster:"+workflowTrackMaster);
 			workflowTrackMaster.getWorkflowTrackDetList().size(); //initialize existing track records
 		
 			VirtualRowRecordsDto savedVirtualRowRecordsDto=virtualTableRecordsService.updateVirtualRecordsFromForm(WorkflowStage.getFormNode().getFormMaster(),workflowTrackMaster.getDataId()); //Updating form data
 			pkValue=savedVirtualRowRecordsDto.getPkValue();
+			logger.debug("submitAction: after update record :"+savedVirtualRowRecordsDto);
 			WorkflowTrackMaster childWorkflowTrack=initiateChildWorkflow(nextLink,childWorkflow,user,pkValue);
 			
 			updateWorkflow(user,workflowTrackMaster,pkValue,nextLink,currentWorkflowNode,childWorkflowTrack);
+			
+			
 		}
 		
-	
+		logger.debug("exitting submitAction: workflow id: "+WorkflowStage.getWorkflowMaster().getId()+" ,pkValue: "	+pkValue);
 				
 	}
 	private boolean isWorkflowCompleted(WorkflowLink nextLink) {

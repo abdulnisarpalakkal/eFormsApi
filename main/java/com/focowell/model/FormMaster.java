@@ -179,6 +179,11 @@ public class FormMaster {
 		this.formRules = formRules;
 	}
 
+	@Override
+	public String toString() {
+		return "FormMaster [id=" + id + ", formName=" + formName + ", virtualTableMaster=" + virtualTableMaster + "]";
+	}
+
 	
 	
 	

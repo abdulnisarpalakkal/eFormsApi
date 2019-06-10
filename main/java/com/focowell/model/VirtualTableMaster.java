@@ -178,6 +178,11 @@ public class VirtualTableMaster implements Serializable {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "VirtualTableMaster [id=" + id + ", tableName=" + tableName + "]";
+	}
+
 	
 	
 	

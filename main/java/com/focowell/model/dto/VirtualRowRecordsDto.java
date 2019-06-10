@@ -47,5 +47,10 @@ public class VirtualRowRecordsDto implements Serializable {
 	public void setVirtualTableMaster(VirtualTableMaster virtualTableMaster) {
 		this.virtualTableMaster = virtualTableMaster;
 	}
+	@Override
+	public String toString() {
+		return "VirtualRowRecordsDto [id=" + id + ", records=" + records + ", pkValue=" + pkValue
+				+ ", virtualTableMaster=" + virtualTableMaster + "]";
+	}
 	
 }

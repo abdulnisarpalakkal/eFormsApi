@@ -180,6 +180,11 @@ public class WorkflowMaster {
 		this.childNodeList = childNodeList;
 	}
 
+	@Override
+	public String toString() {
+		return "WorkflowMaster [id=" + id + ", workflowName=" + workflowName + "]";
+	}
+
 	
 	
 //	public Set<WorkflowTrackMaster> getWorkflowTrackList() {
