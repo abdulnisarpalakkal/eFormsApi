@@ -252,6 +252,7 @@ public class VirtualTableMasterServiceImpl implements VirtualTableMasterService 
 				if(virtualTableFields.isDeleted())
 				{
 					virtualTableFieldsService.delete(virtualTableFields.getId()); //delete requested fields from db
+					updateVirtualTableMaster.getVirtualTableFieldsList().removeIf(field->field.getId()==virtualTableFields.getId());
 					continue;
 				}
 				if(virtualTableFields.getId()!=0)

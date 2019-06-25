@@ -51,6 +51,7 @@ public class VirtualTableFieldDeserializer extends StdDeserializer<VirtualTableF
 		String fieldName=node.get("fieldName")!=null && !node.get("fieldName").isNull()?jsonObjectMapper.treeToValue(node.get("fieldName"),String.class):null;
 		VirtualTableFieldDataType fieldDataType=node.get("fieldName")!=null && !node.get("fieldDataType").isNull()?jsonObjectMapper.treeToValue(node.get("fieldDataType"),VirtualTableFieldDataType.class):null;
 		String fieldDesc=node.get("fieldDesc")!=null && !node.get("fieldDesc").isNull()?jsonObjectMapper.treeToValue(node.get("fieldDesc"),String.class):null;
+		boolean deleted=node.get("deleted")!=null && !node.get("deleted").isNull()?jsonObjectMapper.treeToValue(node.get("deleted"),boolean.class):false;
 		VirtualTableMaster virtualTableMaster=node.get("virtualTableMaster")!=null && !node.get("virtualTableMaster").isNull()?jsonObjectMapper.treeToValue(node.get("virtualTableMaster"),VirtualTableMaster.class):null;
 		
         Set<FormDesign> formDesignList=node.get("formDesignList")!=null && !node.get("formDesignList").isNull()?
@@ -64,7 +65,7 @@ public class VirtualTableFieldDeserializer extends StdDeserializer<VirtualTableF
 //		new HashSet<VirtualTableConstraints>(Arrays.asList(jsonObjectMapper.treeToValue(node.get("refConstraintList"),VirtualTableConstraints[].class))):null;
 
         
-        VirtualTableField virtualTableField=new VirtualTableField(id,fieldName,fieldDesc,fieldDataType,virtualTableMaster,formDesignList,virtualTableConstraints);
+        VirtualTableField virtualTableField=new VirtualTableField(id,fieldName,fieldDesc,deleted,fieldDataType,virtualTableMaster,formDesignList,virtualTableConstraints);
 
         return virtualTableField;
 	}
