@@ -36,7 +36,7 @@ public class VirtualTableRecords implements Serializable {
     private String stringValue;
 	
 //	@Column(name="PK_VALUE")
-    private long pkValue;
+//    private long pkValue;
 	
 //	@JsonIgnoreProperties(value="virtualTableRecords",allowSetters=true)	
 //	@ManyToOne(fetch=FetchType.EAGER)    
@@ -73,14 +73,6 @@ public class VirtualTableRecords implements Serializable {
 	}
 
 
-	public long getPkValue() {
-		return pkValue;
-	}
-
-
-	public void setPkValue(long pkValue) {
-		this.pkValue = pkValue;
-	}
-
+	
 
 }

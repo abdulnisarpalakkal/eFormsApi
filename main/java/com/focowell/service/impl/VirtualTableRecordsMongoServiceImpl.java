@@ -41,8 +41,10 @@ import com.focowell.model.dto.VirtualTableRecordForGridDto;
 import com.focowell.service.FileService;
 import com.focowell.service.FormDesignService;
 import com.focowell.service.VirtualTableFieldsService;
+import com.focowell.service.VirtualTableMasterService;
 import com.focowell.service.VirtualTableRecordsMongoService;
 import com.focowell.service.VirtualTableSequenceService;
+import com.focowell.service.functionalInterface.VirtualTableFieldFilter;
 
 import javassist.NotFoundException;
 
@@ -74,6 +76,9 @@ public class VirtualTableRecordsMongoServiceImpl implements VirtualTableRecordsM
 	private VirtualTableFieldsService virtualTableFieldService;
 	
 	@Autowired
+	private VirtualTableMasterService virtualTableMasterService;
+	
+	@Autowired
 	private FileService fileService;
 	
 	private HttpHeaders getHeaders() {
@@ -87,6 +92,72 @@ public class VirtualTableRecordsMongoServiceImpl implements VirtualTableRecordsM
         return mongoRestUrl+ uri;
     }
 	
+	/**
+	 * Load table and table fields into records
+	 * @param virtualRowRecordsDtoList
+	 */
+	private void LoadTableAndFieldsToVirtualRowRecords(List<VirtualRowRecordsDto> virtualRowRecordsDtoList){
+		if(virtualRowRecordsDtoList==null || virtualRowRecordsDtoList.isEmpty() )
+			return;
+		virtualRowRecordsDtoList.forEach(rowRecord->{
+			rowRecord.setVirtualTableMaster(virtualTableMasterService.findById(rowRecord.getVirtualTableMaster().getId()));
+			
+			final List<VirtualTableField> fields=virtualTableFieldService.findAllByTableId(rowRecord.getVirtualTableMaster().getId());
+			VirtualTableFieldFilter fieldFilter=(id)->fields.stream().filter(field->field.getId()==id).findFirst().orElse(null);
+			rowRecord.getRecords().forEach(record->record.setVirtualTableFields(fieldFilter.filter(record.getVirtualTableFields().getId())));
+			
+		});
+		
+	}
+	/**
+	 * Load table and table fields into records
+	 * @param virtualRowRecordsDtoList
+	 * @param tableId
+	 */
+	private void LoadTableAndFieldsToVirtualRowRecords(List<VirtualRowRecordsDto> virtualRowRecordsDtoList,Long tableId){
+		if(virtualRowRecordsDtoList==null || virtualRowRecordsDtoList.isEmpty() )
+			return;
+		final List<VirtualTableField> fields=virtualTableFieldService.findAllByTableId(tableId); //get all table fields by table id
+		VirtualTableFieldFilter fieldFilter=(id)->fields.stream().filter(field->field.getId()==id).findFirst().orElse(null); //lambda definition of functional interface
+		virtualRowRecordsDtoList.forEach(rowRecord->{
+			rowRecord.setVirtualTableMaster(virtualTableMasterService.findById(rowRecord.getVirtualTableMaster().getId()));
+			List<VirtualTableRecords> recordsToBeDeleted=new ArrayList<>();					
+			rowRecord.getRecords().forEach(record->{
+				VirtualTableField field=fieldFilter.filter(record.getVirtualTableFields().getId()); //get table field using table field if
+				if(field==null)
+					
+					recordsToBeDeleted.add(record);
+				else
+					record.setVirtualTableFields(field);
+			});
+			rowRecord.getRecords().removeAll(recordsToBeDeleted); //remove record if table field is not available
+		});
+	}
+	/**
+	 * Load table and table fields into records
+	 * @param virtualRowRecordsDto
+	 * @param tableId
+	 */
+	private void LoadTableAndFieldsToVirtualRowRecords(VirtualRowRecordsDto virtualRowRecordsDto,Long tableId){
+		
+		if(virtualRowRecordsDto==null )
+			return;
+		final List<VirtualTableField> fields=virtualTableFieldService.findAllByTableId(tableId); //get all table fields by table id
+		VirtualTableFieldFilter fieldFilter=(id)->fields.stream().filter(field->field.getId()==id).findFirst().orElse(null); //lambda definition of functional interface
+		
+		virtualRowRecordsDto.setVirtualTableMaster(virtualTableMasterService.findById(virtualRowRecordsDto.getVirtualTableMaster().getId()));
+							
+		virtualRowRecordsDto.getRecords().forEach(record->{
+			VirtualTableField field=fieldFilter.filter(record.getVirtualTableFields().getId()); //get table field using table field if
+			if(field==null)
+				virtualRowRecordsDto.getRecords().remove(record); //remove record if table field is not available
+			else
+				record.setVirtualTableFields(field);
+		});
+			
+		
+	}
+	
 	@Override
 	public List<VirtualRowRecordsDto> findAll() {
 		List<VirtualRowRecordsDto> virtualRowRecordsDtoList = new ArrayList<>();
@@ -97,26 +168,28 @@ public class VirtualTableRecordsMongoServiceImpl implements VirtualTableRecordsM
   	          createURLWithPort("/row/records"), HttpMethod.GET, entity, new ParameterizedTypeReference<List<VirtualRowRecordsDto>>(){});
 		virtualRowRecordsDtoList=response.getBody();
 		
+		LoadTableAndFieldsToVirtualRowRecords(virtualRowRecordsDtoList);
 		return virtualRowRecordsDtoList;
 	}
 	
+	
 	@Override
 	public  VirtualRowRecordsDto findAllRowsByTableAndPk(long tableId,long pkValue) {
-		
-		
-		
+				
 		 VirtualRowRecordsDto virtualRowRecordsDto =null;
 		 HttpEntity<String> entity = new HttpEntity<String>(null, getHeaders());
 		 Map<String, String> urlVariables=new HashMap<>();
 		 urlVariables.put("tableId", Long.toString(tableId));
 		 urlVariables.put("pkValue", Long.toString(pkValue));
 		 
-//	 	urlVariables.put("id", 1L);
+	//	 	urlVariables.put("id", 1L);
 		 ResponseEntity<VirtualRowRecordsDto> response=restTemplate.exchange(
 	  	          createURLWithPort("/row/records/tableId/pk/{tableId}/{pkValue}"), HttpMethod.GET, entity
 	  	          , VirtualRowRecordsDto.class,urlVariables);
 		 virtualRowRecordsDto=response.getBody();
-		return virtualRowRecordsDto;
+		 
+		 LoadTableAndFieldsToVirtualRowRecords(virtualRowRecordsDto,tableId);
+		 return virtualRowRecordsDto;
 	}
 	@Override
 	public VirtualRowRecordsDto findRowByTableAndPk(long tableId,long pkValue) {
@@ -137,6 +210,7 @@ public class VirtualTableRecordsMongoServiceImpl implements VirtualTableRecordsM
 		ResponseEntity<List<VirtualRowRecordsDto>> response=restTemplate.exchange(
 	  	          createURLWithPort("/row/records/tableId/{tableId}"), HttpMethod.GET, entity, new ParameterizedTypeReference<List<VirtualRowRecordsDto>>(){},urlVariables);
 		virtualRowRecordsDtoList=response.getBody();
+		LoadTableAndFieldsToVirtualRowRecords(virtualRowRecordsDtoList,tableId);
 		return virtualRowRecordsDtoList;
 		
 		

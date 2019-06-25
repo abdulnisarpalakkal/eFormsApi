@@ -37,7 +37,7 @@ public class VirtualTableField implements Serializable {
 	
 //	private static final long serialVersionUID = 1L;
 
-	public VirtualTableField(long id,  String fieldName,String fieldDesc,
+	public VirtualTableField(long id,  String fieldName,String fieldDesc,boolean deleted,
 			VirtualTableFieldDataType fieldDataType,  
 			VirtualTableMaster virtualTableMaster, Set<FormDesign> formDesignList,
 			Set<VirtualTableConstraints> fieldConstraintList) {
@@ -46,6 +46,7 @@ public class VirtualTableField implements Serializable {
 		this.fieldName = fieldName;
 		this.fieldDataType = fieldDataType;
 		this.fieldDesc = fieldDesc;
+		this.deleted=deleted;
 		
 		this.virtualTableMaster = virtualTableMaster;
 		this.formDesignList = formDesignList;
