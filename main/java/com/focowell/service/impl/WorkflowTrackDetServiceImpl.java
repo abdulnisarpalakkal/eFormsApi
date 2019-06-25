@@ -57,6 +57,13 @@ public class WorkflowTrackDetServiceImpl implements WorkflowTrackDetService {
 		workflowTrackDetDao.findAllByProcessJPQL(processId).iterator().forEachRemaining(list::add);
 		return list;
 	}
+	@Override
+	public List<WorkflowTrackDet> findAllByWorkflowTrackMaster(Long workflowTrackMasterId) {
+		List<WorkflowTrackDet> list = new ArrayList<>();
+		
+		workflowTrackDetDao.findAllByWorkflowTrackMasterJPQL(workflowTrackMasterId).iterator().forEachRemaining(list::add);
+		return list;
+	}
 	
 	
 	@Override

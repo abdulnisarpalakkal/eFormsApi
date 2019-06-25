@@ -8,6 +8,9 @@ import com.focowell.model.WorkflowTrackMaster;
 
 public interface WorkflowTrackMasterService {
 	    List<WorkflowTrackMaster> findAll();
+	    List<WorkflowTrackMaster> findAllByWorkflow(Long workflowId);
+	    List<WorkflowTrackMaster> findAllByProcess(Long processId);
+	    List<WorkflowTrackMaster> findAllByUser();
 	    void delete(long id);
 	    WorkflowTrackMaster findOne(String workflowTrackMasterName);
 
@@ -23,6 +26,9 @@ public interface WorkflowTrackMasterService {
 		
 		long mergeVirtualRecords(FormMaster form, long pkValue) throws Exception;
 		WorkflowTrackMaster completeWorkflow(WorkflowTrackMaster workflowTrackMaster);
+		
+		
+		
 		
 		
 }

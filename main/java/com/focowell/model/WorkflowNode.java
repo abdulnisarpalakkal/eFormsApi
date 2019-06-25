@@ -75,10 +75,13 @@ public class WorkflowNode {
 	@OneToMany(mappedBy="workflowNode",fetch=FetchType.LAZY,cascade= CascadeType.ALL,orphanRemoval=true)
 	public Set<ActionEventObject> actionEventObjects;
 
-	@JsonIgnoreProperties(value= {"workflowNode"},allowSetters=true)
-	@OneToMany(mappedBy="workflowNode",fetch=FetchType.LAZY)
-	public Set<WorkflowTrackDet> workflowTrackDetList;
+	@JsonIgnoreProperties(value= {"workflowActionNode"},allowSetters=true)
+	@OneToMany(mappedBy="workflowActionNode",fetch=FetchType.LAZY)
+	public Set<WorkflowTrackDet> workflowActionTrackDetList;
 		
+	@JsonIgnoreProperties(value= {"workflowFormNode"},allowSetters=true)
+	@OneToMany(mappedBy="workflowFormNode",fetch=FetchType.LAZY)
+	public Set<WorkflowTrackDet> workflowFormTrackDetList;
 
 	public long getNodeId() {
 		return nodeId;
@@ -171,13 +174,23 @@ public class WorkflowNode {
 		this.childWorkflow = childWorkflow;
 	}
 
-	public Set<WorkflowTrackDet> getWorkflowTrackDetList() {
-		return workflowTrackDetList;
+	public Set<WorkflowTrackDet> getWorkflowActionTrackDetList() {
+		return workflowActionTrackDetList;
 	}
 
-	public void setWorkflowTrackDetList(Set<WorkflowTrackDet> workflowTrackDetList) {
-		this.workflowTrackDetList = workflowTrackDetList;
+	public void setWorkflowActionTrackDetList(Set<WorkflowTrackDet> workflowActionTrackDetList) {
+		this.workflowActionTrackDetList = workflowActionTrackDetList;
 	}
+
+	public Set<WorkflowTrackDet> getWorkflowFormTrackDetList() {
+		return workflowFormTrackDetList;
+	}
+
+	public void setWorkflowFormTrackDetList(Set<WorkflowTrackDet> workflowFormTrackDetList) {
+		this.workflowFormTrackDetList = workflowFormTrackDetList;
+	}
+
+	
 
 	
 	

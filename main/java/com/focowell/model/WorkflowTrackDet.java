@@ -45,9 +45,13 @@ public class WorkflowTrackDet {
 	@ManyToOne(fetch=FetchType.LAZY)    
 	private WorkflowTrackMaster childWorkflowTrackMaster;
 	
-	@JsonIgnoreProperties(value="workflowTrackDetList",allowSetters=true)
+	@JsonIgnoreProperties(value="workflowActionTrackDetList",allowSetters=true)
 	@ManyToOne(fetch=FetchType.EAGER)    
-	private WorkflowNode workflowNode;
+	private WorkflowNode workflowActionNode;
+	
+	@JsonIgnoreProperties(value="workflowFormTrackDetList",allowSetters=true)
+	@ManyToOne(fetch=FetchType.EAGER)    
+	private WorkflowNode workflowFormNode;
 	
 	
 	
@@ -86,15 +90,25 @@ public class WorkflowTrackDet {
 		this.workflowTrackMaster = workflowTrackMaster;
 	}
 
-	public WorkflowNode getWorkflowNode() {
-		return workflowNode;
+	
+
+
+
+	public WorkflowNode getWorkflowActionNode() {
+		return workflowActionNode;
 	}
 
-	public void setWorkflowNode(WorkflowNode workflowNode) {
-		this.workflowNode = workflowNode;
+	public void setWorkflowActionNode(WorkflowNode workflowActionNode) {
+		this.workflowActionNode = workflowActionNode;
 	}
 
+	public WorkflowNode getWorkflowFormNode() {
+		return workflowFormNode;
+	}
 
+	public void setWorkflowFormNode(WorkflowNode workflowFormNode) {
+		this.workflowFormNode = workflowFormNode;
+	}
 
 	public boolean isOpen() {
 		return open;

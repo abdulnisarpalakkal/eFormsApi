@@ -17,6 +17,7 @@ public interface WorkflowTrackDetService {
 	    WorkflowTrackDet update(WorkflowTrackDet workflowTrackDet);
 		WorkflowTrackDet updateOpenStatus(WorkflowTrackDet workflowTrackDet);
 		List<WorkflowTrackDet> findAllByProcess(long processId);
+		List<WorkflowTrackDet> findAllByWorkflowTrackMaster(Long workflowTrackMasterId);
 		
 		
 		
