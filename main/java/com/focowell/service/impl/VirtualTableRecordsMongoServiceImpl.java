@@ -367,11 +367,11 @@ public class VirtualTableRecordsMongoServiceImpl implements VirtualTableRecordsM
 	}
 	private String getFieldValueFromFormComponent(Set<FormDesign> formDesignList,String fieldName) {
 		Optional<FormDesign> formDesignOptional=formDesignList.stream()
-				.filter(design->design.getVirtualTableField().getFieldName().equals(fieldName)).findFirst();
+				.filter(design->design.getComponentType()!=FormComponentType.GRID && design.getFormComponent().getVirtualTableField().getFieldName().equals(fieldName)).findFirst();
 		if(formDesignOptional.isPresent())
 		{
 			FormDesign formDesign=formDesignOptional.get();
-			String componentValue=formDesign.getComponentValue();
+			String componentValue=formDesign.getFormComponent().getComponentValue();
 			if(formDesign.getComponentType()==FormComponentType.FILE) {
 				componentValue=fileService.getFileNameFromPath(componentValue);
 			}

@@ -291,15 +291,26 @@ public class VirtualTableMasterServiceImpl implements VirtualTableMasterService 
 			constraints.add(virtualTableFieldsConstraintDto.getPkConstraint());
 			
 		}
+		
 		if(virtualTableFieldsConstraintDto.getFkConstraints()!=null ) {
 			virtualTableFieldsConstraintDto.getFkConstraints().forEach(fk->{
-				VirtualTableField field= resVirtualTableMaster.getVirtualTableFieldsList().stream()
-						.filter(f->f.getFieldName().equals(fk.getVirtualTableField().getFieldName())).findFirst().orElse(null);
-//				if(field.getFieldConstraintList()==null)
-//					field.setFieldConstraintList(new HashSet<VirtualTableConstraints>());
-//				field.getFieldConstraintList().add(fk);
-				fk.setVirtualTableField(field);
-				constraints.add(fk);
+				
+				if(fk.isDeleted()){
+					virtualTableConstraintsService.delete(fk.getId()); //delete requested fields from db
+					
+				}
+				else {
+					VirtualTableField field= resVirtualTableMaster.getVirtualTableFieldsList().stream()
+							.filter(f->f.getFieldName().equals(fk.getVirtualTableField().getFieldName())).findFirst().orElse(null);
+//					if(field.getFieldConstraintList()==null)
+//						field.setFieldConstraintList(new HashSet<VirtualTableConstraints>());
+//					field.getFieldConstraintList().add(fk);
+					fk.setVirtualTableField(field);
+					
+				
+					constraints.add(fk);
+				}
+				
 			});
 			
 		}

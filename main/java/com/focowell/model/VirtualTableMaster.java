@@ -68,6 +68,10 @@ public class VirtualTableMaster implements Serializable {
 	@JsonIgnoreProperties(value="virtualTableMaster",allowSetters=true)
     @OneToMany( mappedBy="virtualTableMaster" ,fetch=FetchType.LAZY)
     public Set<FormMaster> formMasterList;
+	
+	@JsonIgnoreProperties(value="virtualTableMaster",allowSetters=true)
+    @OneToMany( mappedBy="virtualTableMaster" ,fetch=FetchType.LAZY)
+    public Set<FormGrid> formGridList;
     
 	public long getId() {
 		return id;
@@ -151,6 +155,14 @@ public class VirtualTableMaster implements Serializable {
 
 	public void setFormMasterList(Set<FormMaster> formMasterList) {
 		this.formMasterList = formMasterList;
+	}
+
+	public Set<FormGrid> getFormGridList() {
+		return formGridList;
+	}
+
+	public void setFormGridList(Set<FormGrid> formGridList) {
+		this.formGridList = formGridList;
 	}
 
 	@Override

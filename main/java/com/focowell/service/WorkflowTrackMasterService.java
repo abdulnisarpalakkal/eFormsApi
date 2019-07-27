@@ -6,6 +6,8 @@ import com.focowell.model.FormMaster;
 import com.focowell.model.WorkflowStage;
 import com.focowell.model.WorkflowTrackMaster;
 
+import javassist.NotFoundException;
+
 public interface WorkflowTrackMasterService {
 	    List<WorkflowTrackMaster> findAll();
 	    List<WorkflowTrackMaster> findAllByWorkflow(Long workflowId);
@@ -18,7 +20,7 @@ public interface WorkflowTrackMasterService {
 	    WorkflowTrackMaster save(WorkflowTrackMaster workflowTrackMaster) ;
 	    WorkflowTrackMaster update(WorkflowTrackMaster workflowTrackMaster);
 	   
-		WorkflowStage execute(WorkflowStage WorkflowStage);
+		WorkflowStage execute(WorkflowStage WorkflowStage) throws NotFoundException;
 		void submitAction(WorkflowStage WorkflowStage) throws Exception;
 
 		List<WorkflowStage> findAllOpenWorkflowTracks();

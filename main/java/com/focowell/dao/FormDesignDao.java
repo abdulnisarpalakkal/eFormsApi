@@ -15,13 +15,13 @@ import com.focowell.model.FormDesign;
 public interface FormDesignDao extends CrudRepository<FormDesign, Long> {
 	List<FormDesign> findByComponentName(String componentName);
 	
-	@Query("SELECT v FROM FormDesign v left join fetch v.formMaster left join fetch v.virtualTableField ")
+	@Query("SELECT v FROM FormDesign v left join fetch v.formMaster left join fetch v.formComponent fc left join fetch fc.virtualTableField ")
 	Iterable<FormDesign> findAllByJPQL();
 	
-	@Query("SELECT v FROM FormDesign v left join fetch v.formMaster left join fetch v.virtualTableField where id=:id ")
+	@Query("SELECT v FROM FormDesign v left join fetch v.formMaster left join fetch v.formComponent fc left join fetch fc.virtualTableField  where id=:id ")
 	Optional<FormDesign> findByIdJPQL(@Param("id") long id);
 	
-	@Query("SELECT v FROM FormDesign v left join fetch v.formMaster f left join fetch v.virtualTableField where f.id=:formId ")
+	@Query("SELECT v FROM FormDesign v left join fetch v.formMaster f left join fetch v.formComponent fc left join fetch fc.virtualTableField  where f.id=:formId ")
 	Iterable<FormDesign> findAllByFormIdJPQL(@Param("formId") long formId);
 	
 }

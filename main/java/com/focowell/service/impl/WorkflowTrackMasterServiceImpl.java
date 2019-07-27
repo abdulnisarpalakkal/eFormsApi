@@ -16,6 +16,7 @@ import javax.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Hibernate;
+import org.hibernate.validator.internal.metadata.descriptor.ConstraintDescriptorImpl.ConstraintType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -29,6 +30,10 @@ import com.focowell.model.FormDesign;
 import com.focowell.model.FormMaster;
 import com.focowell.model.User;
 import com.focowell.model.UserRoles;
+import com.focowell.model.VirtualTableConstraintType;
+import com.focowell.model.VirtualTableConstraints;
+import com.focowell.model.VirtualTableField;
+import com.focowell.model.VirtualTableMaster;
 import com.focowell.model.VirtualTableRecords;
 import com.focowell.model.WorkflowLink;
 import com.focowell.model.WorkflowMaster;
@@ -41,6 +46,7 @@ import com.focowell.model.dto.VirtualRowRecordsDto;
 import com.focowell.service.FileService;
 import com.focowell.service.FormDesignService;
 import com.focowell.service.UserService;
+import com.focowell.service.VirtualTableConstraintsService;
 import com.focowell.service.VirtualTableFieldsService;
 import com.focowell.service.VirtualTableRecordsMongoService;
 import com.focowell.service.VirtualTableSequenceService;
@@ -48,6 +54,8 @@ import com.focowell.service.WorkflowLinkService;
 import com.focowell.service.WorkflowMasterService;
 import com.focowell.service.WorkflowTrackDetService;
 import com.focowell.service.WorkflowTrackMasterService;
+
+import javassist.NotFoundException;
 
 @Service(value = "workflowTrackMasterService")
 public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterService {
@@ -82,6 +90,9 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 	
 	@Autowired
 	private FileService fileService;
+	
+	@Autowired
+	private VirtualTableConstraintsService virtualTableConstraintsService;
 	
 	
 	
@@ -212,7 +223,7 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 	}
 	//this function will be called when user click on the workflow link
 	@Override
-	public WorkflowStage execute(WorkflowStage workflowStage) {
+	public WorkflowStage execute(WorkflowStage workflowStage) throws NotFoundException {
 		
 		WorkflowNode formNode=null;
 		WorkflowStage nextStage=null;
@@ -231,7 +242,17 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 			if(!isWorkflowStarting ) {  //if it is not start form then fetch data that is submitted previously
 				formNode.getFormMaster().setVirtualRowRecordsDto(
 						virtualTableRecordsService.findRowByTableAndPk(formNode.getFormMaster().getVirtualTableMaster().getId(),workflowStage.getWorkflowTrackDet().getWorkflowTrackMaster().getDataId()));
-				setValuesToForm(formNode.getFormMaster().getVirtualRowRecordsDto().getRecords(), formNode.getFormMaster().getFormDesignList());	 //setting form value if form is view
+				if(formNode.getFormMaster().getVirtualRowRecordsDto()==null) {
+					WorkflowTrackMaster trackMaster= findById(workflowStage.getWorkflowTrackDet().getWorkflowTrackMaster().getId());
+					workflowStage.getWorkflowTrackDet().setWorkflowTrackMaster(trackMaster);
+					trackMaster.setCompleted(true);
+					workflowStage.getWorkflowTrackDet().setOpen(false);
+//					workflowTrackMasterDao.save(trackMaster);
+					workflowTrackDetService.save(workflowStage.getWorkflowTrackDet());
+					throw new NotFoundException("This workflow closed forcily since it coudn't find corresponding virtual table record ");
+				}
+				else
+					setValuesToForm(formNode.getFormMaster().getVirtualRowRecordsDto().getRecords(), formNode.getFormMaster().getFormDesignList());	 //setting form value if form is view
 			}
 			
 			formNode.getFormMaster().getFormDesignList().forEach(design->{
@@ -276,11 +297,14 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 	}
 	
 	private void setValuesToForm(List<VirtualTableRecords> records, Set<FormDesign> designList) {
+		Set<FormDesign> nonGriddesignList=designList.stream()
+				.filter(design->design.getComponentType()!=FormComponentType.GRID)
+				.collect(Collectors.toSet());
 		if(records!=null) { //setting form value if form is view
-			designList.forEach(design->{
+			nonGriddesignList.forEach(design->{
 				final Optional<String> val=records.stream()
 						.filter(record->
-								design.getVirtualTableField()
+								design.getFormComponent().getVirtualTableField()
 								.getFieldName().equals(record.getVirtualTableFields().getFieldName()))
 								.map(VirtualTableRecords::getStringValue)
 								.map(Optional::ofNullable).findFirst().orElse(null);
@@ -289,14 +313,14 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 						File file =fileService.getFile(val.get());
 						try {
 							String encodeImage = Base64.getEncoder().withoutPadding().encodeToString(Files.readAllBytes(file.toPath()));
-							design.setComponentValue(encodeImage);
+							design.getFormComponent().setComponentValue(encodeImage);
 						} catch (IOException e) {
 							
 						}
 					}
 				}
 				else
-					design.setComponentValue(val!=null?(val.isPresent()?val. get():null):null);
+					design.getFormComponent().setComponentValue(val!=null?(val.isPresent()?val. get():null):null);
 				
 				
 			});
@@ -337,7 +361,7 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 			IsNextNodeChildWorkflow=nextLink.getTargetNode().getNodeType()==WorkflowNodeType.CHILD_WORKFLOW;
 			
 			
-			currentWorkflowNode=IsNextNodeChildWorkflow?currentTargetNode:currentSourceNode;
+			currentWorkflowNode=IsNextNodeChildWorkflow?currentTargetNode:currentSourceNode; //if next node is child workflow, then this workflow should continue after the completion of child workflow 
 			childWorkflow=nextLink.getTargetNode().getChildWorkflow();
 			logger.debug("submitAction: workflow id: "+WorkflowStage.getWorkflowMaster().getId()+" ,currentWorkflowNode id: "+currentWorkflowNode.getId()+" ;  currentTargetNode id: "+currentTargetNode.getId());
 		}
@@ -345,7 +369,7 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 			currentWorkflowNode=WorkflowStage.getSelectedActionNode();
 								
 		if(isWorkflowStarting) { 	// if it is start of workflow, then workflowTrackMaster need to be saved
-			VirtualRowRecordsDto savedVirtualRowRecordsDto=virtualTableRecordsService.saveVirtualRecordsFromForm(WorkflowStage.getFormNode().getFormMaster()); //Saving form data
+			VirtualRowRecordsDto savedVirtualRowRecordsDto=virtualTableRecordsService.saveVirtualRecordsFromForm(currentFormNode.getFormMaster()); //Saving form data
 			pkValue=savedVirtualRowRecordsDto.getPkValue();
 			WorkflowTrackMaster childWorkflowTrack=initiateChildWorkflow(nextLink,childWorkflow,user,pkValue,currentFormNode);
 			initiateWorkflow(user,WorkflowStage.getWorkflowMaster(),pkValue,nextLink,currentWorkflowNode,childWorkflowTrack,currentFormNode);
@@ -358,12 +382,12 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 			logger.debug("submitAction: find workflowTrackMaster:"+workflowTrackMaster);
 			workflowTrackMaster.getWorkflowTrackDetList().size(); //initialize existing track records
 		
-			VirtualRowRecordsDto savedVirtualRowRecordsDto=virtualTableRecordsService.updateVirtualRecordsFromForm(WorkflowStage.getFormNode().getFormMaster(),workflowTrackMaster.getDataId()); //Updating form data
+			VirtualRowRecordsDto savedVirtualRowRecordsDto=virtualTableRecordsService.updateVirtualRecordsFromForm(currentFormNode.getFormMaster(),workflowTrackMaster.getDataId()); //Updating form data
 			pkValue=savedVirtualRowRecordsDto.getPkValue();
 			logger.debug("submitAction: after update record :"+savedVirtualRowRecordsDto);
 			WorkflowTrackMaster childWorkflowTrack=initiateChildWorkflow(nextLink,childWorkflow,user,pkValue,currentFormNode); //initiate child workflow if available
 			if(IsNextNodeChildWorkflow)
-				workflowTrackMaster=updateWorkflow(user,workflowTrackMaster,pkValue,nextLink,currentSourceNode,null,currentFormNode);
+				workflowTrackMaster=updateWorkflow(user,workflowTrackMaster,pkValue,nextLink,currentSourceNode,null,currentFormNode); //this is for tracking 
 			updateWorkflow(user,workflowTrackMaster,pkValue,nextLink,currentWorkflowNode,childWorkflowTrack,currentFormNode);
 			
 			
@@ -376,14 +400,60 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 		
 		return nextLink==null || nextLink.getSourceNode().getNodeType()==WorkflowNodeType.STOP || nextLink.getTargetNode().getNodeType()==WorkflowNodeType.STOP;
 	}
-	private WorkflowTrackMaster initiateChildWorkflow(WorkflowLink parentLink,WorkflowMaster childWorkflow,User user,long pkValue,WorkflowNode currentFormNode) {
+	private WorkflowTrackMaster initiateChildWorkflow(WorkflowLink parentLink,WorkflowMaster childWorkflow,User user,long pkValue,WorkflowNode currentFormNode) throws Exception {
 		if(parentLink==null || parentLink.getTargetNode().getNodeType()!=WorkflowNodeType.CHILD_WORKFLOW) 
 			return null;
+		
 		Hibernate.initialize(childWorkflow);
+		
+		VirtualTableMaster parentTable=currentFormNode.getFormMaster().getVirtualTableMaster(); //table of the form which called the child workflow
+		List<WorkflowLink> workflowLinks= workflowLinkService.findAllByWorkflow(childWorkflow.getId()); //get all workflow links under this workflow
+		WorkflowNode childFormNode=getNextFormNode(null,workflowLinks); //get next available form
+		VirtualTableMaster childTable=childFormNode.getFormMaster().getVirtualTableMaster(); //table of the form which will be showing for the child workflow
+		
+		if(parentTable.getId()!=childTable.getId()) { //if tables of parent and child are different, then the child should refer the parent 
+			
+//			VirtualTableField parentWorkflowRefField=findParentWorkflowReferringField(parentTable,childTable); //find field of child table which is referring parent table
+		
+			
+			List<VirtualTableRecords> records=new ArrayList<>();
+						
+			for(VirtualTableField field:virtualTableFieldService.findAllByTableId(childTable.getId())) {
+				VirtualTableRecords virtualTableRecord=new VirtualTableRecords();
+				virtualTableRecord.setVirtualTableFields(field);
+				
+				if(field.getFieldConstraintList()!=null && field.getFieldConstraintList().size()!=0)
+				{
+					boolean IsReferringParentTable=false;
+					IsReferringParentTable= field.getFieldConstraintList().stream()
+					.anyMatch(constraint->constraint.getConstraintType()==VirtualTableConstraintType.FOREIGN_KEY 
+					&& constraint.getForeignConstraint().getVirtualTableField().getVirtualTableMaster().getId()==parentTable.getId());
+					if(IsReferringParentTable)
+						virtualTableRecord.setStringValue(pkValue+"");
+				}
+				
+				records.add(virtualTableRecord);
+			}
+			VirtualRowRecordsDto childVirtualRowRecordsDto=new VirtualRowRecordsDto(records,0,childTable);
+			
+			VirtualRowRecordsDto savedVirtualRowRecordsDto=virtualTableRecordsService.saveOneRowRecordAfterCheckPkValue(childVirtualRowRecordsDto); //inserting one record child workflow
+			pkValue=savedVirtualRowRecordsDto.getPkValue();
+		}
+		
+		
 		WorkflowLink firstLink=workflowLinkService.findStartNodeByWorkflow(childWorkflow.getId());
 		return initiateWorkflow(user,childWorkflow,pkValue,firstLink,firstLink.getSourceNode(),null,currentFormNode);
 	}
-	private WorkflowTrackMaster initiateWorkflow(User user,WorkflowMaster workflowMaster,long pkValue,WorkflowLink nextLink,WorkflowNode currentWorkflowNode,WorkflowTrackMaster childWorkflowTrack,WorkflowNode currentFormNode) {
+	private VirtualTableField findParentWorkflowReferringField(VirtualTableMaster parentTable,VirtualTableMaster childTable) {
+		List<VirtualTableConstraints> childWorkflowTableConstraints= virtualTableConstraintsService.findAllByTableId(childTable.getId());
+		VirtualTableField parentWorkflowRefField= childWorkflowTableConstraints.stream()
+		.filter(constraint->constraint.getConstraintType()==VirtualTableConstraintType.FOREIGN_KEY 
+		&& constraint.getForeignConstraint().getVirtualTableField().getVirtualTableMaster().getId()==parentTable.getId())
+		.map(VirtualTableConstraints::getVirtualTableField).findFirst().orElse(null); //get field which is referring parent table
+		return parentWorkflowRefField;
+	}
+	private WorkflowTrackMaster initiateWorkflow(User user,WorkflowMaster workflowMaster,long pkValue,WorkflowLink nextLink
+			,WorkflowNode currentWorkflowNode,WorkflowTrackMaster childWorkflowTrack,WorkflowNode currentFormNode) {
 		WorkflowTrackMaster workflowTrackMaster=null;
 		boolean isCompleted=isWorkflowCompleted(nextLink);
 		WorkflowTrackDet workflowTrackDet=new WorkflowTrackDet();

@@ -16,6 +16,8 @@ import com.focowell.model.WorkflowStage;
 import com.focowell.model.WorkflowTrackMaster;
 import com.focowell.service.WorkflowTrackMasterService;
 
+import javassist.NotFoundException;
+
 //@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
 @RestController
 @RequestMapping("/workflowTrackMaster")
@@ -72,7 +74,7 @@ public class WorkflowTrackMasterController {
     }
     
     @RequestMapping(value="/workflowTrackMasters/execute", method = RequestMethod.POST)
-    public WorkflowStage execute(@RequestBody WorkflowStage workflowStage) {
+    public WorkflowStage execute(@RequestBody WorkflowStage workflowStage) throws NotFoundException {
     	return workflowTrackMasterService.execute(workflowStage);
     }
     

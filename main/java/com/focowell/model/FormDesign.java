@@ -18,6 +18,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -30,20 +31,22 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity  
 @Table(name="form_design")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+//@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class FormDesign {
 	public FormDesign() {
 		
 	}
 	public FormDesign(String componentName, String componentLabel, FormComponentType componentType
 			,int alignOrder, VirtualTableField virtualTableField ) {
-		this.componentName=componentName;
-		this.componentLabel=componentLabel;
+	
 		this.componentType=componentType;
 		this.alignOrder=alignOrder;
-//		this.componentRefValues=componentRefValues;
-		this.virtualTableField=virtualTableField;
-		
+		if(this.componentType!=FormComponentType.GRID) {
+			this.formComponent=new FormComponent();
+			this.formComponent.setComponentLabel(componentLabel);
+			this.formComponent.setVirtualTableField(virtualTableField);
+		}
+	
 	}
 	@Id  
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator = "form_design_seq")
@@ -55,8 +58,7 @@ public class FormDesign {
 	@Size(min=2)
     private String componentName;
 	
-	@Column(name="COMPONENT_LABEL")
-	private String componentLabel;
+	
 	
 	
 	@Column(name="COMPONENT_TYPE")
@@ -69,20 +71,15 @@ public class FormDesign {
 	@Column(name="HIDE")
 	private boolean hide;
 	
-	@Column(name="COMPONENT_VALUE")
-	private String componentValue;
-	
-	@JsonIgnoreProperties(value="formDesign",allowSetters=true)
-	@OneToMany(mappedBy="formDesign", fetch=FetchType.EAGER,cascade=CascadeType.ALL ,orphanRemoval=true)
-	private Set<FormComponentRefValue> componentRefValues;
+		
 	
 	@JsonIgnoreProperties(value="formDesignList",allowSetters=true)
 	@ManyToOne(fetch=FetchType.LAZY)  
 	private FormMaster formMaster;
 	
-	@JsonIgnoreProperties(value="formDesignList",allowSetters=true)
-	@ManyToOne(fetch=FetchType.EAGER)  
-	private VirtualTableField virtualTableField;
+	
+	
+	
 	
 	@JsonIgnoreProperties(value={"formDesigns","formMaster"},allowSetters=true)
 	@ManyToMany(fetch=FetchType.EAGER,cascade=CascadeType.MERGE)
@@ -90,11 +87,16 @@ public class FormDesign {
 			joinColumns= {@JoinColumn(name="form_design_id")},
 			inverseJoinColumns= {@JoinColumn(name="form_rule_id")})
 	private Set<FormRule> formRules;
+	
+	@JsonIgnoreProperties(value="formDesignList",allowSetters=true)
+	@ManyToOne
+	private FormGrid formGrid;
 
-	@Transient
-	@JsonSerialize
-	@JsonDeserialize
-	List<Map<String,VirtualTableRecords>> gridRecords;
+	@JsonIgnoreProperties(value="formDesign",allowSetters=true)
+	@OneToOne(cascade=CascadeType.ALL,orphanRemoval=true)
+	private FormComponent formComponent;
+
+	
 	
 	public long getId() {
 		return id;
@@ -138,21 +140,7 @@ public class FormDesign {
 		this.alignOrder = alignOrder;
 	}
 
-	public VirtualTableField getVirtualTableField() {
-		return virtualTableField;
-	}
-
-	public void setVirtualTableField(VirtualTableField virtualTableField) {
-		this.virtualTableField = virtualTableField;
-	}
-
-	public String getComponentLabel() {
-		return componentLabel;
-	}
-
-	public void setComponentLabel(String componentLabel) {
-		this.componentLabel = componentLabel;
-	}
+	
 
 	public boolean isHide() {
 		return hide;
@@ -162,22 +150,7 @@ public class FormDesign {
 		this.hide = hide;
 	}
 
-	public String getComponentValue() {
-		return componentValue;
-	}
-
-	public void setComponentValue(String componentValue) {
-		this.componentValue = componentValue;
-	}
-
-	public Set<FormComponentRefValue> getComponentRefValues() {
-		return componentRefValues;
-	}
-
-	public void setComponentRefValues(Set<FormComponentRefValue> componentRefValues) {
-		this.componentRefValues = componentRefValues;
-	}
-
+	
 	public Set<FormRule> getFormRules() {
 		return formRules;
 	}
@@ -185,12 +158,19 @@ public class FormDesign {
 	public void setFormRules(Set<FormRule> formRules) {
 		this.formRules = formRules;
 	}
-	public List<Map<String, VirtualTableRecords>> getGridRecords() {
-		return gridRecords;
+	public FormGrid getFormGrid() {
+		return formGrid;
 	}
-	public void setGridRecords(List<Map<String, VirtualTableRecords>> gridRecords) {
-		this.gridRecords = gridRecords;
+	public void setFormGrid(FormGrid formGrid) {
+		this.formGrid = formGrid;
 	}
+	public FormComponent getFormComponent() {
+		return formComponent;
+	}
+	public void setFormComponent(FormComponent formComponent) {
+		this.formComponent = formComponent;
+	}
+	
 
 	
 

@@ -17,6 +17,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -76,11 +78,11 @@ public class WorkflowNode {
 	public Set<ActionEventObject> actionEventObjects;
 
 	@JsonIgnoreProperties(value= {"workflowActionNode"},allowSetters=true)
-	@OneToMany(mappedBy="workflowActionNode",fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="workflowActionNode",fetch=FetchType.LAZY,cascade = CascadeType.ALL)
 	public Set<WorkflowTrackDet> workflowActionTrackDetList;
 		
 	@JsonIgnoreProperties(value= {"workflowFormNode"},allowSetters=true)
-	@OneToMany(mappedBy="workflowFormNode",fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="workflowFormNode",fetch=FetchType.LAZY,cascade = CascadeType.ALL)
 	public Set<WorkflowTrackDet> workflowFormTrackDetList;
 
 	public long getNodeId() {

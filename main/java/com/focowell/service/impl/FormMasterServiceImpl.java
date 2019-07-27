@@ -1,6 +1,7 @@
 package com.focowell.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -114,22 +115,45 @@ public class FormMasterServiceImpl implements FormMasterService {
 	
 		// settting bidirectional relationship b/w formDesign and formRule, formDesign and componentRefValues, formRule and formRuleParameterValue
 
-		formDesigns.forEach(design->{
-			design.setFormMaster(updateFormMaster);
-			if(design.getComponentRefValues()!=null)
-				design.getComponentRefValues().forEach(refValue->refValue.setFormDesign(design));
-			
-			
-			
-			if(design.getFormRules()!=null) { 
-				Set<FormRule> fromFormRules=design.getFormRules().stream()
+		
+		formDesigns.forEach(formDesign->{
+			if(formDesign.getFormComponent()!=null) {
+				formDesign.getFormComponent().setFormDesign(formDesign);
+				if(formDesign.getFormComponent().getComponentRefValues()!=null)
+					formDesign.getFormComponent().getComponentRefValues().forEach(refValue->refValue.setFormComponent(formDesign.getFormComponent()));
+			}
+			if(formDesign.getFormGrid()!=null) {
+				if(formDesign.getFormGrid().getFormDesignList()!=null)
+					formDesign.getFormGrid().getFormDesignList().add(formDesign);
+				else
+					formDesign.getFormGrid().setFormDesignList(new HashSet<>(Arrays.asList(formDesign))) ;
+					
+			}
+			if(formDesign.getFormRules()!=null) { 
+				Set<FormRule> fromFormRules=formDesign.getFormRules().stream()
 						.map(designRule->formDesignDto.getFormRules().stream()
 								.filter(rule->rule.getFormRuleName().equals(designRule.getFormRuleName())).findFirst().get())
 						.collect(Collectors.toSet());
-				design.setFormRules(fromFormRules);
+				formDesign.setFormRules(fromFormRules);
 			}
-			
 		});
+		
+//		formDesigns.forEach(design->{
+//			design.setFormMaster(updateFormMaster);
+//			if(design.getComponentRefValues()!=null)
+//				design.getComponentRefValues().forEach(refValue->refValue.setFormDesign(design));
+//			
+//			
+//			
+//			if(design.getFormRules()!=null) { 
+//				Set<FormRule> fromFormRules=design.getFormRules().stream()
+//						.map(designRule->formDesignDto.getFormRules().stream()
+//								.filter(rule->rule.getFormRuleName().equals(designRule.getFormRuleName())).findFirst().get())
+//						.collect(Collectors.toSet());
+//				design.setFormRules(fromFormRules);
+//			}
+//			
+//		});
 		if(formDesignDto.getFormRules()!=null) {
 			formDesignDto.getFormRules().forEach(formRule->{
 				formRule.setFormMaster(updateFormMaster);

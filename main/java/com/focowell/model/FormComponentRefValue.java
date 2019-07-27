@@ -40,7 +40,7 @@ public class FormComponentRefValue {
 	
 	@JsonIgnoreProperties(value="componentRefValues",allowSetters=true)
 	@ManyToOne(fetch=FetchType.LAZY)
-	public FormDesign formDesign;
+	public FormComponent formComponent;
 
 	public long getId() {
 		return id;
@@ -66,13 +66,15 @@ public class FormComponentRefValue {
 		this.refValue = refValue;
 	}
 
-	public FormDesign getFormDesign() {
-		return formDesign;
+	public FormComponent getFormComponent() {
+		return formComponent;
 	}
 
-	public void setFormDesign(FormDesign formDesign) {
-		this.formDesign = formDesign;
+	public void setFormComponent(FormComponent formComponent) {
+		this.formComponent = formComponent;
 	}
+
+	
 	
 	
 }

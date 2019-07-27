@@ -22,7 +22,7 @@ public interface FormMasterDao extends CrudRepository<FormMaster, Long> {
 	@Query("SELECT v FROM FormMaster v left join fetch v.virtualTableMaster t where t.process.id=:processId ")
 	Iterable<FormMaster> findAllByProcessJPQL(@Param("processId") long processId);
 	
-	@Query("SELECT v FROM FormMaster v left join fetch v.virtualTableMaster where id=:id ")
+	@Query("SELECT v FROM FormMaster v left join fetch v.virtualTableMaster where v.id=:id ")
 	Optional<FormMaster> findByIdJPQL(@Param("id") long id);
 	
 }

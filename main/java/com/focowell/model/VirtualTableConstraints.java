@@ -17,8 +17,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import javax.persistence.Transient;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.focowell.model.deserializer.VirtualTableConstraintsDeserializer;
 
 @Entity  
@@ -68,6 +71,11 @@ public class VirtualTableConstraints implements Serializable {
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="foreignConstraint",cascade=CascadeType.REMOVE) 
 	private Set<VirtualTableConstraints> childConstraintList;
 
+	@Transient
+	@JsonSerialize
+	@JsonDeserialize
+	private boolean deleted;
+	
 	public long getId() {
 		return id;
 	}
@@ -116,6 +124,14 @@ public class VirtualTableConstraints implements Serializable {
 
 	public void setChildConstraintList(Set<VirtualTableConstraints> childConstraintList) {
 		this.childConstraintList = childConstraintList;
+	}
+
+	public boolean isDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package com.focowell.model;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -14,6 +15,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
@@ -23,6 +25,7 @@ import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.Transient;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.focowell.model.deserializer.VirtualTableFieldDeserializer;
@@ -39,7 +42,7 @@ public class VirtualTableField implements Serializable {
 
 	public VirtualTableField(long id,  String fieldName,String fieldDesc,boolean deleted,
 			VirtualTableFieldDataType fieldDataType,  
-			VirtualTableMaster virtualTableMaster, Set<FormDesign> formDesignList,
+			VirtualTableMaster virtualTableMaster, Set<FormComponent> formComponentList,
 			Set<VirtualTableConstraints> fieldConstraintList) {
 		super();
 		this.id = id;
@@ -49,7 +52,7 @@ public class VirtualTableField implements Serializable {
 		this.deleted=deleted;
 		
 		this.virtualTableMaster = virtualTableMaster;
-		this.formDesignList = formDesignList;
+		this.formComponentList = formComponentList;
 		this.fieldConstraintList = fieldConstraintList;
 //		this.refConstraintList = refConstraintList;
 	}
@@ -88,12 +91,16 @@ public class VirtualTableField implements Serializable {
 	
 	@JsonIgnoreProperties("virtualTableField")
 	@OneToMany( mappedBy="virtualTableField")   
-	public Set<FormDesign> formDesignList;
+	public Set<FormComponent> formComponentList;
 
 //	@JsonIgnore
 	@JsonIgnoreProperties(value="virtualTableField",allowSetters=true) 
 	@OneToMany( mappedBy="virtualTableField" ,fetch=FetchType.EAGER, cascade=CascadeType.MERGE,orphanRemoval=true)
 	public Set<VirtualTableConstraints> fieldConstraintList;
+	
+	@JsonIgnore
+    @ManyToMany(mappedBy="virtualTableFields")
+    private Set<FormGrid> formGrids ;
 	
 //	@JsonIgnoreProperties(value="refVirtualTableField",allowSetters=true)
 //	@OneToMany( mappedBy="refVirtualTableField" ,fetch=FetchType.LAZY)
@@ -151,12 +158,14 @@ public class VirtualTableField implements Serializable {
 		this.virtualTableMaster = virtualTableMaster;
 	}
 
-	public Set<FormDesign> getFormDesignList() {
-		return formDesignList;
+
+
+	public Set<FormComponent> getFormComponentList() {
+		return formComponentList;
 	}
 
-	public void setFormDesignList(Set<FormDesign> formDesignList) {
-		this.formDesignList = formDesignList;
+	public void setFormComponentList(Set<FormComponent> formComponentList) {
+		this.formComponentList = formComponentList;
 	}
 
 	public Set<VirtualTableConstraints> getFieldConstraintList() {
@@ -191,6 +200,14 @@ public class VirtualTableField implements Serializable {
 
 
 
+
+	public Set<FormGrid> getFormGrids() {
+		return formGrids;
+	}
+
+	public void setFormGrids(Set<FormGrid> formGrids) {
+		this.formGrids = formGrids;
+	}
 
 	@Override
 	public int hashCode() {

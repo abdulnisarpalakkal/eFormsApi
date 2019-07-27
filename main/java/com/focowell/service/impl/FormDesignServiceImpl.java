@@ -2,6 +2,7 @@ package com.focowell.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,11 +103,24 @@ public class FormDesignServiceImpl implements FormDesignService {
 	public List<FormDesign> saveAll(List<FormDesign> formDesigns)  {
 		
 		List<FormDesign> list = new ArrayList<>();
+		
+		 // keeping bidirectional relationship
+		
 		formDesigns.forEach(formDesign->{
-			if(formDesign.getComponentRefValues()!=null) {
-				formDesign.getComponentRefValues().forEach(refValue->refValue.setFormDesign(formDesign));
+			if(formDesign.getFormComponent()!=null) {
+				formDesign.getFormComponent().setFormDesign(formDesign);
+				formDesign.getFormComponent().getComponentRefValues().forEach(refValue->refValue.setFormComponent(formDesign.getFormComponent()));
+			}
+			if(formDesign.getFormGrid()!=null) {
+				if(formDesign.getFormGrid().getFormDesignList()!=null)
+					formDesign.getFormGrid().getFormDesignList().add(formDesign);
+				else
+					formDesign.getFormGrid().setFormDesignList(new HashSet<>(Arrays.asList(formDesign))) ;
+					
 			}
 		});
+		
+		
 		formDesignDao.saveAll(formDesigns).iterator().forEachRemaining(list::add);
 		return list;
 		
@@ -118,15 +132,27 @@ public class FormDesignServiceImpl implements FormDesignService {
 		FormDesign updateFormDesign =formDesignDao.findById(formDesign.getId()).get();
 				
 		updateFormDesign.setComponentName(formDesign.getComponentName());
-		updateFormDesign.setComponentLabel(formDesign.getComponentLabel());
+		
 		updateFormDesign.setComponentType(formDesign.getComponentType());
-		updateFormDesign.setComponentValue(formDesign.getComponentValue());
+		
 		
 		updateFormDesign.setAlignOrder(formDesign.getAlignOrder());
 		updateFormDesign.setHide(formDesign.isHide());
 		updateFormDesign.setFormMaster(formDesign.getFormMaster());
-		updateFormDesign.setVirtualTableField(formDesign.getVirtualTableField());
-		updateFormDesign.setComponentRefValues(formDesign.getComponentRefValues());
+		
+		
+		if(updateFormDesign.getFormComponent()!=null && formDesign.getFormComponent()!=null) {
+			updateFormDesign.getFormComponent().setComponentLabel(formDesign.getFormComponent().getComponentLabel());
+			updateFormDesign.getFormComponent().setComponentValue(formDesign.getFormComponent().getComponentValue());
+			updateFormDesign.getFormComponent().setVirtualTableField(formDesign.getFormComponent().getVirtualTableField());
+			updateFormDesign.getFormComponent().setComponentRefValues(formDesign.getFormComponent().getComponentRefValues());
+		}
+		else 
+			updateFormDesign.setFormComponent(formDesign.getFormComponent());
+		
+		//TODO grid updation
+			
+		
         return formDesignDao.save(updateFormDesign);
 	}
 	
@@ -146,20 +172,22 @@ public class FormDesignServiceImpl implements FormDesignService {
 	
 	@Override
 	public void populateRefValuesIfForeignKey(FormDesign formDesign) {
-		if(formDesign.getVirtualTableField().getFieldConstraintList()==null || formDesign.getVirtualTableField().getFieldConstraintList().isEmpty() )
+		
+		if(formDesign.getComponentType()==FormComponentType.GRID 
+				|| formDesign.getFormComponent().getVirtualTableField().getFieldConstraintList()==null || formDesign.getFormComponent().getVirtualTableField().getFieldConstraintList().isEmpty() )
 			return;
-		VirtualTableConstraints foreignConstraint=formDesign.getVirtualTableField().getFieldConstraintList()
+		VirtualTableConstraints foreignConstraint=formDesign.getFormComponent().getVirtualTableField().getFieldConstraintList()
 				.stream().filter(constraint->constraint.getConstraintType()==VirtualTableConstraintType.FOREIGN_KEY).findFirst().orElse(null);
 		if(foreignConstraint!=null) {
 			long tableId=foreignConstraint.getForeignConstraint().getVirtualTableField().getVirtualTableMaster().getId();
 			FormComponentRefValue compRefValue=new FormComponentRefValue();
 			compRefValue.setRefKey(foreignConstraint.getForeignConstraint().getVirtualTableField().getFieldName());
-			if(formDesign.getComponentRefValues()==null) 
+			if(formDesign.getFormComponent().getComponentRefValues()==null) 
 				compRefValue.setRefValue(foreignConstraint.getForeignConstraint().getVirtualTableField().getFieldName());
 			else 
-				compRefValue.setRefValue(formDesign.getComponentRefValues().stream().findFirst().get().getRefValue());
+				compRefValue.setRefValue(formDesign.getFormComponent().getComponentRefValues().stream().findFirst().get().getRefValue());
 			
-			formDesign.setComponentRefValues(
+			formDesign.getFormComponent().setComponentRefValues(
 					virtualTableRecordsService.findAllFormComponentRefValueByTableAndFields(
 							tableId,
 							compRefValue.getRefKey(), //reference key always will be the primary field of reference table

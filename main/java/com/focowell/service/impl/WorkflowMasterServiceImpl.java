@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,7 +80,9 @@ public class WorkflowMasterServiceImpl implements WorkflowMasterService {
 
 	@Override
 	public WorkflowMaster findById(Long id) {
-		return workflowMasterDao.findById(id).get();
+		WorkflowMaster workflow= workflowMasterDao.findById(id).get();
+		Hibernate.initialize(workflow.getProcess());
+		return workflow;
 	}
 
 	@Override
