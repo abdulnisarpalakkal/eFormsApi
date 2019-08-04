@@ -68,6 +68,11 @@ public class WorkflowTrackMasterController {
     public WorkflowTrackMaster update(@RequestBody WorkflowTrackMaster workflowTrackMaster) {
     	return workflowTrackMasterService.update(workflowTrackMaster);
     }
+    @RequestMapping(value="/workflowTrackMasters/publishedWorkflows", method = RequestMethod.GET)
+    public List<WorkflowStage> getPublishedWorkflows() {
+    	return workflowTrackMasterService.findAllPublishedWorkflows();
+    }
+    
     @RequestMapping(value="/workflowTrackMasters/openWorkflows", method = RequestMethod.GET)
     public List<WorkflowStage> getOpenWorkflows() {
     	return workflowTrackMasterService.findAllOpenWorkflowTracks();

@@ -80,6 +80,8 @@ public class WorkflowNode {
 	@JsonIgnoreProperties(value= {"workflowActionNode"},allowSetters=true)
 	@OneToMany(mappedBy="workflowActionNode",fetch=FetchType.LAZY,cascade = CascadeType.ALL)
 	public Set<WorkflowTrackDet> workflowActionTrackDetList;
+	
+	
 		
 	@JsonIgnoreProperties(value= {"workflowFormNode"},allowSetters=true)
 	@OneToMany(mappedBy="workflowFormNode",fetch=FetchType.LAZY,cascade = CascadeType.ALL)
@@ -191,6 +193,9 @@ public class WorkflowNode {
 	public void setWorkflowFormTrackDetList(Set<WorkflowTrackDet> workflowFormTrackDetList) {
 		this.workflowFormTrackDetList = workflowFormTrackDetList;
 	}
+
+	
+
 
 	
 

@@ -17,7 +17,7 @@ public interface WorkflowLinkService {
 	    WorkflowLink save(WorkflowLink workflowLink) throws AlreadyExistsException;
 	    boolean saveAll(List<WorkflowLink> workflowLinks) throws AlreadyExistsException;
 	    WorkflowLink update(WorkflowLink workflowLink);
-	    WorkflowLink findBySourceId(long sourceNodeid);
+	    List<WorkflowLink> findBySourceId(long sourceNodeid);
 	    WorkflowLink findStartNodeByWorkflow(long workflowId);
 		
 		

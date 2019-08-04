@@ -1,7 +1,9 @@
 package com.focowell.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +15,12 @@ import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.dao.UserDao;
 import com.focowell.dao.WorkflowTrackDetDao;
 import com.focowell.model.User;
+import com.focowell.model.WorkflowNodeType;
 import com.focowell.model.WorkflowTrackDet;
 import com.focowell.service.UserService;
 import com.focowell.service.WorkflowTrackDetService;
+
+import io.jsonwebtoken.lang.Collections;
 
 @Service(value = "workflowTrackDetService")
 public class WorkflowTrackDetServiceImpl implements WorkflowTrackDetService {
@@ -65,7 +70,15 @@ public class WorkflowTrackDetServiceImpl implements WorkflowTrackDetService {
 		return list;
 	}
 	
-	
+	@Override
+	public List<WorkflowTrackDet> findAllByWorkflowTrackMasterWhichHavingChildWorkflow(Long workflowTrackMasterId) {
+		
+		List<WorkflowTrackDet> trackDetList = findAllByWorkflowTrackMaster(workflowTrackMasterId);
+		if(trackDetList!=null)
+			trackDetList=trackDetList.stream().filter(trackDet->trackDet.getWorkflowActionNode().getNodeType()==WorkflowNodeType.CHILD_WORKFLOW).collect(Collectors.toList());
+		
+		return trackDetList;
+	}
 	@Override
 	public void delete(long id) {
 		workflowTrackDetDao.deleteById(id);

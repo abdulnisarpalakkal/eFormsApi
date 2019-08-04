@@ -2,6 +2,7 @@ package com.focowell.model;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -29,6 +30,8 @@ public class WorkflowStage implements Serializable {
 	private WorkflowTrackDet workflowTrackDet;
 	
 	private WorkflowNode selectedActionNode;
+//	private WorkflowTrackDet prevTrack;
+	private List<WorkflowTrackDet> prevTracks;
 	
 	
 	public long getId() {
@@ -72,7 +75,19 @@ public class WorkflowStage implements Serializable {
 	public void setSelectedActionNode(WorkflowNode selectedActionNode) {
 		this.selectedActionNode = selectedActionNode;
 	}
-	
+//	public WorkflowTrackDet getPrevTrack() {
+//		return prevTrack;
+//	}
+//	public void setPrevTrack(WorkflowTrackDet prevTrack) {
+//		this.prevTrack = prevTrack;
+//	}
+	public List<WorkflowTrackDet> getPrevTracks() {
+		return prevTracks;
+	}
+	public void setPrevTracks(List<WorkflowTrackDet> prevTracks) {
+		this.prevTracks = prevTracks;
+	}
+
 	
 
 }

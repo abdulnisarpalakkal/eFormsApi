@@ -49,6 +49,14 @@ public class WorkflowTrackDet {
 	@ManyToOne(fetch=FetchType.EAGER)    
 	private WorkflowNode workflowActionNode;
 	
+	@JsonIgnoreProperties(value="workflowPrevTrackDetList",allowSetters=true)
+	@ManyToOne(fetch=FetchType.EAGER)    
+	private WorkflowTrackDet workflowPrevTrack;
+	
+	@JsonIgnoreProperties(value= {"workflowPrevTrack"},allowSetters=true)
+	@OneToMany(mappedBy="workflowPrevTrack",fetch=FetchType.LAZY,cascade = CascadeType.ALL)
+	public Set<WorkflowTrackDet> workflowPrevTrackDetList;
+	
 	@JsonIgnoreProperties(value="workflowFormTrackDetList",allowSetters=true)
 	@ManyToOne(fetch=FetchType.EAGER)    
 	private WorkflowNode workflowFormNode;
@@ -126,6 +134,24 @@ public class WorkflowTrackDet {
 		this.childWorkflowTrackMaster = childWorkflowTrackMaster;
 	}
 
+	
+
+	public WorkflowTrackDet getWorkflowPrevTrack() {
+		return workflowPrevTrack;
+	}
+
+	public void setWorkflowPrevTrack(WorkflowTrackDet workflowPrevTrack) {
+		this.workflowPrevTrack = workflowPrevTrack;
+	}
+
+	public Set<WorkflowTrackDet> getWorkflowPrevTrackDetList() {
+		return workflowPrevTrackDetList;
+	}
+
+	public void setWorkflowPrevTrackDetList(Set<WorkflowTrackDet> workflowPrevTrackDetList) {
+		this.workflowPrevTrackDetList = workflowPrevTrackDetList;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -143,6 +169,8 @@ public class WorkflowTrackDet {
 		if (getClass() != obj.getClass())
 			return false;
 		WorkflowTrackDet other = (WorkflowTrackDet) obj;
+		if(id==0)
+			return false;
 		if (id != other.id)
 			return false;
 		return true;

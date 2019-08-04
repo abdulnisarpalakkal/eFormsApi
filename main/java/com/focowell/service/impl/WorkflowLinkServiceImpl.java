@@ -63,7 +63,7 @@ public class WorkflowLinkServiceImpl implements WorkflowLinkService {
 		return workflowLinkDao.findById(id).get();
 	}
 	@Override
-	public WorkflowLink findBySourceId(long sourceNodeid) {
+	public List<WorkflowLink> findBySourceId(long sourceNodeid) {
 		return workflowLinkDao.findBySourceNode_NodeId(sourceNodeid);
 	}
 

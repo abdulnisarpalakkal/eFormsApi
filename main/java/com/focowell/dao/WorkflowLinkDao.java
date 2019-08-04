@@ -1,7 +1,10 @@
 package com.focowell.dao;
 
+import java.util.List;
+
 import javax.transaction.Transactional;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -20,7 +23,8 @@ public interface WorkflowLinkDao extends CrudRepository<WorkflowLink, Long> {
 	@Query("SELECT v FROM WorkflowLink v left join fetch v.sourceNode s left join fetch v.targetNode t  left join fetch v.workflowMaster w where w.id=:workflowId and s.nodeType=:startType ")
 	WorkflowLink findFirstLinkByWorkflowIdJPQL(@Param("workflowId") long workflowId,@Param("startType") WorkflowNodeType type);
 	
-	WorkflowLink findBySourceNode_NodeId(long sourceNodeid);
+	@EntityGraph("link-entity-graph")
+	List<WorkflowLink> findBySourceNode_NodeId(long sourceNodeid);
 	Long removeByWorkflowMaster_Id(long workflowId);
 	
 	@Modifying

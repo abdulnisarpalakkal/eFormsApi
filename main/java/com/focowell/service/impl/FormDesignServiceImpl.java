@@ -193,7 +193,7 @@ public class FormDesignServiceImpl implements FormDesignService {
 							compRefValue.getRefKey(), //reference key always will be the primary field of reference table
 							compRefValue.getRefValue()
 							));
-			formDesign.setComponentType(FormComponentType.COMPO);
+//			formDesign.setComponentType(FormComponentType.COMPO);
 		}
 	}
 	@Override

@@ -34,6 +34,13 @@ public class WorkflowTrackMaster {
 		this.dataId=dataId;
 		this.workflowTrackDetList=workflowTrackDetList;
 	}
+	public WorkflowTrackMaster(WorkflowMaster workflowMaster,User requestedUser,long dataId,Set<WorkflowTrackDet> workflowTrackDetList,Set<WorkflowTrackDet> parentWorkflowTrackDetList) {
+		this.workflowMaster=workflowMaster;
+		this.requestedUser=requestedUser;
+		this.dataId=dataId;
+		this.workflowTrackDetList=workflowTrackDetList;
+		this.parentWorkflowTrackDetList=parentWorkflowTrackDetList;
+	}
 	@Id  
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator = "workflow_track_master_seq")
     @SequenceGenerator(name = "workflow_track_master_seq",allocationSize = 1, sequenceName = "DB_WF_TRACK_MASTER_SEQ")

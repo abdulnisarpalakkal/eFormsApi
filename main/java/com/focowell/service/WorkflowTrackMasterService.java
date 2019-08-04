@@ -22,12 +22,13 @@ public interface WorkflowTrackMasterService {
 	   
 		WorkflowStage execute(WorkflowStage WorkflowStage) throws NotFoundException;
 		void submitAction(WorkflowStage WorkflowStage) throws Exception;
-
+		List<WorkflowStage> findAllPublishedWorkflows();
 		List<WorkflowStage> findAllOpenWorkflowTracks();
 		boolean formIsAccessable(FormMaster form);
 		
 		long mergeVirtualRecords(FormMaster form, long pkValue) throws Exception;
 		WorkflowTrackMaster completeWorkflow(WorkflowTrackMaster workflowTrackMaster);
+		
 		
 		
 		

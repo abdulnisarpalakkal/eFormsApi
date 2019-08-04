@@ -1,6 +1,5 @@
 package com.focowell.model;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -8,11 +7,20 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
+@NamedEntityGraph(
+		  name = "link-entity-graph",
+		  attributeNodes = {
+		    @NamedAttributeNode("sourceNode"),
+		    @NamedAttributeNode("targetNode"),
+		    
+		  }
+		)
 @Entity  
 @Table(name="workflow_link")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
