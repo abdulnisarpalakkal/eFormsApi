@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.focowell.model.dto.VirtualRowRecordsDto;
 
 @Entity  
 @Table(name="form_master")
@@ -85,7 +84,7 @@ public class FormMaster {
 	@Transient
 	@JsonSerialize
 	@JsonDeserialize 
-	private VirtualRowRecordsDto virtualRowRecordsDto;
+	private VirtualRowRecord virtualRowRecordsDto;
 	
 	
 
@@ -163,11 +162,11 @@ public class FormMaster {
 
 	
 
-	public VirtualRowRecordsDto getVirtualRowRecordsDto() {
+	public VirtualRowRecord getVirtualRowRecordsDto() {
 		return virtualRowRecordsDto;
 	}
 
-	public void setVirtualRowRecordsDto(VirtualRowRecordsDto virtualRowRecordsDto) {
+	public void setVirtualRowRecordsDto(VirtualRowRecord virtualRowRecordsDto) {
 		this.virtualRowRecordsDto = virtualRowRecordsDto;
 	}
 

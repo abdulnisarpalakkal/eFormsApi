@@ -11,6 +11,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -20,6 +23,17 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+//@NamedEntityGraph(
+//		name="graph.WorkflowTrackDet.workflowTrackMaster.workflowMaster",
+//		attributeNodes= {
+//				 @NamedAttributeNode(value="workflowTrackMaster",subgraph = "workflowTrackMaster.workflowMaster")
+//			},
+//		subgraphs=@NamedSubgraph(name="workflowTrackMaster.workflowMaster",attributeNodes=
+//				{
+//						@NamedAttributeNode(value="workflowMaster")
+//						
+//				}
+//		))
 @Entity  
 @Table(name="workflow_track_det")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

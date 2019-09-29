@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.dao.FormDesignDao;
+import com.focowell.dto.FormDesignPageDto;
 import com.focowell.model.FormComponentRefValue;
 import com.focowell.model.FormComponentType;
 import com.focowell.model.FormDesign;
@@ -17,7 +18,6 @@ import com.focowell.model.VirtualTableConstraintType;
 import com.focowell.model.VirtualTableConstraints;
 import com.focowell.model.VirtualTableField;
 import com.focowell.model.VirtualTableFieldDataType;
-import com.focowell.model.dto.FormDesignDto;
 import com.focowell.service.FormDesignService;
 import com.focowell.service.FormRuleService;
 import com.focowell.service.FormRuleTypeService;
@@ -59,8 +59,8 @@ public class FormDesignServiceImpl implements FormDesignService {
 	}
 	
 	@Override
-	public FormDesignDto findAllByFormId(Long formId) {
-		FormDesignDto formDesignDto=new FormDesignDto();
+	public FormDesignPageDto findAllByFormId(Long formId) {
+		FormDesignPageDto formDesignDto=new FormDesignPageDto();
 		
 		formDesignDto.setFormDesigns(findAllFormComponentsByFormId(formId));
 		formDesignDto.setFormRules(formRuleService.findByFormId(formId));
@@ -182,7 +182,7 @@ public class FormDesignServiceImpl implements FormDesignService {
 			long tableId=foreignConstraint.getForeignConstraint().getVirtualTableField().getVirtualTableMaster().getId();
 			FormComponentRefValue compRefValue=new FormComponentRefValue();
 			compRefValue.setRefKey(foreignConstraint.getForeignConstraint().getVirtualTableField().getFieldName());
-			if(formDesign.getFormComponent().getComponentRefValues()==null) 
+			if(formDesign.getFormComponent().getComponentRefValues()==null || formDesign.getFormComponent().getComponentRefValues().isEmpty()) 
 				compRefValue.setRefValue(foreignConstraint.getForeignConstraint().getVirtualTableField().getFieldName());
 			else 
 				compRefValue.setRefValue(formDesign.getFormComponent().getComponentRefValues().stream().findFirst().get().getRefValue());

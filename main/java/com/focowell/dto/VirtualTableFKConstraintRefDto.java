@@ -1,4 +1,4 @@
-package com.focowell.model.dto;
+package com.focowell.dto;
 
 import java.io.Serializable;
 import java.util.List;

@@ -1,8 +1,8 @@
 package com.focowell.controller;
 
 import com.focowell.config.error.AlreadyExistsException;
+import com.focowell.dto.UserDto;
 import com.focowell.model.User;
-import com.focowell.model.dto.UserDto;
 import com.focowell.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;

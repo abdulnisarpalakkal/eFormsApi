@@ -20,12 +20,12 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.focowell.config.JwtTokenUtil;
 import com.focowell.config.error.AlreadyExistsException;
+import com.focowell.dto.UserDto;
 import com.focowell.model.AuthToken;
 import com.focowell.model.Constants;
 import com.focowell.model.LoginUser;
 import com.focowell.model.StaticData;
 import com.focowell.model.User;
-import com.focowell.model.dto.UserDto;
 import com.focowell.service.UserService;
 
 @CrossOrigin

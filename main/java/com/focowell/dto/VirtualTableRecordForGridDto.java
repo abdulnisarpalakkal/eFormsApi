@@ -1,20 +1,21 @@
-package com.focowell.model.dto;
+package com.focowell.dto;
 
 import java.util.List;
 import java.util.Map;
 
 import com.focowell.model.FormDesign;
+import com.focowell.model.VirtualRowRecord;
 import com.focowell.model.VirtualTableField;
 
 public class VirtualTableRecordForGridDto {
-	List<VirtualRowRecordsDto> rowRecords;
+	List<VirtualRowRecord> rowRecords;
 	List<VirtualTableField> columns;
 	List<FormDesign> formDesigns;
 	
-	public List<VirtualRowRecordsDto> getRowRecords() {
+	public List<VirtualRowRecord> getRowRecords() {
 		return rowRecords;
 	}
-	public void setRowRecords(List<VirtualRowRecordsDto> rowRecords) {
+	public void setRowRecords(List<VirtualRowRecord> rowRecords) {
 		this.rowRecords = rowRecords;
 	}
 	public List<VirtualTableField> getColumns() {

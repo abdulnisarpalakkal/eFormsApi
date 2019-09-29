@@ -1,4 +1,4 @@
-package com.focowell.model.dto;
+package com.focowell.dto;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.focowell.config.error.AlreadyExistsException;
+import com.focowell.dto.FormDesignPageDto;
 import com.focowell.model.FormComponentType;
 import com.focowell.model.FormDesign;
 import com.focowell.model.VirtualTableFieldDataType;
-import com.focowell.model.dto.FormDesignDto;
 import com.focowell.service.UserService;
 import com.focowell.service.FormDesignService;
 
@@ -47,7 +47,7 @@ public class FormDesignController {
         return formDesignService.findAll();
     }
     @RequestMapping(value="/formDesign/form/{formId}", method = RequestMethod.GET)
-    public FormDesignDto listByFormId(@PathVariable(value = "formId") Long formId){
+    public FormDesignPageDto listByFormId(@PathVariable(value = "formId") Long formId){
         return formDesignService.findAllByFormId(formId);
     }
     @RequestMapping(value="/formDesign/components/form/{formId}", method = RequestMethod.GET)

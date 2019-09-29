@@ -3,8 +3,8 @@ package com.focowell.service;
 import java.util.List;
 
 import com.focowell.config.error.AlreadyExistsException;
+import com.focowell.dto.ProcessSubModulesDto;
 import com.focowell.model.ProcessData;
-import com.focowell.model.dto.ProcessSubModulesDto;
 
 
 public interface ProcessService {

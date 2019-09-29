@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.focowell.config.error.AlreadyExistsException;
+import com.focowell.dto.VirtualTableFKConstraintRefDto;
+import com.focowell.dto.VirtualTableFieldsConstraintDto;
+import com.focowell.dto.VirtualTableRecordForGridDto;
 import com.focowell.model.FormMaster;
+import com.focowell.model.VirtualRowRecord;
 import com.focowell.model.VirtualTableMaster;
-import com.focowell.model.dto.VirtualRowRecordsDto;
-import com.focowell.model.dto.VirtualTableFKConstraintRefDto;
-import com.focowell.model.dto.VirtualTableFieldsConstraintDto;
-import com.focowell.model.dto.VirtualTableRecordForGridDto;
 import com.focowell.service.UserService;
 import com.focowell.service.VirtualTableMasterService;
 import com.focowell.service.VirtualTableRecordsMongoService;
@@ -92,7 +92,7 @@ public class VirtualTableMasterController {
         return virtualTableRecordsService.findAllByTableForGrid(tableId);
     }
     @RequestMapping(value="/virtualTableMaster/records", method = RequestMethod.POST)
-    public VirtualRowRecordsDto addOneRowRecordAfterCheckPkValue(@RequestBody VirtualRowRecordsDto virtualRowRecordsDto) throws Exception {
+    public VirtualRowRecord addOneRowRecordAfterCheckPkValue(@RequestBody VirtualRowRecord virtualRowRecordsDto) throws Exception {
         return virtualTableRecordsService.saveOneRowRecordAfterCheckPkValue(virtualRowRecordsDto);
     }
     

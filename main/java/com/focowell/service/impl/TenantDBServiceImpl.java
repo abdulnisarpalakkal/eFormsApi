@@ -13,7 +13,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.focowell.model.dto.TenantDBDto;
+import com.focowell.dto.TenantDBDto;
 import com.focowell.service.TenantDBService;
 
 @Service(value="tenantDBService")

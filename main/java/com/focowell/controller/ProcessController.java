@@ -1,8 +1,8 @@
 package com.focowell.controller;
 
 import com.focowell.config.error.AlreadyExistsException;
+import com.focowell.dto.ProcessSubModulesDto;
 import com.focowell.model.ProcessData;
-import com.focowell.model.dto.ProcessSubModulesDto;
 import com.focowell.service.ProcessService;
 import com.focowell.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

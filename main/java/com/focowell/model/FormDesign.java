@@ -17,6 +17,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -31,6 +32,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity  
 @Table(name="form_design")
+//@NamedEntityGraph(name)
+
 //@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class FormDesign {
 	public FormDesign() {

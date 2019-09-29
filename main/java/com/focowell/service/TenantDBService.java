@@ -3,7 +3,7 @@ package com.focowell.service;
 import java.util.List;
 import java.util.Map;
 
-import com.focowell.model.dto.TenantDBDto;
+import com.focowell.dto.TenantDBDto;
 
 public interface TenantDBService {
 	List<TenantDBDto> getTenantDBList();

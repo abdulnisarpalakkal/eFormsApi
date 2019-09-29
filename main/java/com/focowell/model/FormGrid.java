@@ -21,7 +21,6 @@ import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.focowell.model.dto.VirtualRowRecordsDto;
 
 @Entity
 @Table(name="form_grid")
@@ -54,7 +53,7 @@ public class FormGrid {
 	@Transient
 	@JsonSerialize
 	@JsonDeserialize
-	List<VirtualRowRecordsDto> gridRecords; 
+	List<VirtualRowRecord> gridRecords; 
 	
 	
 	@JsonIgnoreProperties(value="formGrid",allowSetters=true)
@@ -98,10 +97,10 @@ public class FormGrid {
 	public void setVirtualTableMaster(VirtualTableMaster virtualTableMaster) {
 		this.virtualTableMaster = virtualTableMaster;
 	}
-	public List<VirtualRowRecordsDto> getGridRecords() {
+	public List<VirtualRowRecord> getGridRecords() {
 		return gridRecords;
 	}
-	public void setGridRecords(List<VirtualRowRecordsDto> gridRecords) {
+	public void setGridRecords(List<VirtualRowRecord> gridRecords) {
 		this.gridRecords = gridRecords;
 	}
 	public Set<FormDesign> getFormDesignList() {

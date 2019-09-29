@@ -1,6 +1,8 @@
 package com.focowell.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -12,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.focowell.config.error.AlreadyExistsException;
+import com.focowell.convertor.WorkflowStageConvertor;
+import com.focowell.dto.WorkflowStageDto;
+import com.focowell.dto.WorkflowStageExpandedDto;
 import com.focowell.model.WorkflowStage;
 import com.focowell.model.WorkflowTrackMaster;
 import com.focowell.service.WorkflowTrackMasterService;
@@ -26,7 +31,8 @@ public class WorkflowTrackMasterController {
     @Autowired
     private WorkflowTrackMasterService workflowTrackMasterService;
     
- 
+    @Autowired
+    private WorkflowStageConvertor workflowStageConvertor;
 
     @RequestMapping(value="/workflowTrackMasters", method = RequestMethod.POST)
     public WorkflowTrackMaster create(@RequestBody WorkflowTrackMaster workflowTrackMaster) throws AlreadyExistsException{
@@ -69,23 +75,34 @@ public class WorkflowTrackMasterController {
     	return workflowTrackMasterService.update(workflowTrackMaster);
     }
     @RequestMapping(value="/workflowTrackMasters/publishedWorkflows", method = RequestMethod.GET)
-    public List<WorkflowStage> getPublishedWorkflows() {
-    	return workflowTrackMasterService.findAllPublishedWorkflows();
+    public List<WorkflowStageDto> getPublishedWorkflows() {
+    	
+//    	List<WorkflowStageDto> lst=new ArrayList<>();
+//    	for(WorkflowStage stage:workflowTrackMasterService.findAllPublishedWorkflows()) {
+//    		WorkflowStageDto stagedto=workflowStageConvertor.convertWorkflowStageToWorkflowStageDto(stage);
+//    		lst.add(stagedto);
+//    	}
+//    	return lst;
+    	return workflowTrackMasterService.findAllPublishedWorkflows().stream()
+    			.map(workflowStage->workflowStageConvertor.convertWorkflowStageToWorkflowStageDto(workflowStage)).collect(Collectors.toList());
     }
     
     @RequestMapping(value="/workflowTrackMasters/openWorkflows", method = RequestMethod.GET)
-    public List<WorkflowStage> getOpenWorkflows() {
-    	return workflowTrackMasterService.findAllOpenWorkflowTracks();
+    public List<WorkflowStageDto> getOpenWorkflows() {
+//    	return workflowTrackMasterService.findAllOpenWorkflowTracks();
+    	return workflowTrackMasterService.findAllOpenWorkflowTracks().stream()
+    			.map(workflowStage->workflowStageConvertor.convertWorkflowStageToWorkflowStageDto(workflowStage)).collect(Collectors.toList());
     }
     
     @RequestMapping(value="/workflowTrackMasters/execute", method = RequestMethod.POST)
-    public WorkflowStage execute(@RequestBody WorkflowStage workflowStage) throws NotFoundException {
-    	return workflowTrackMasterService.execute(workflowStage);
+    public WorkflowStageExpandedDto execute(@RequestBody WorkflowStageDto workflowStageDto) throws NotFoundException {
+    	WorkflowStage workflowStage=workflowStageConvertor.convertWorkflowStageDtoToWorkflowStage(workflowStageDto);
+    	return workflowStageConvertor.convertWorkflowStageToWorkflowStageExpandedDto(workflowTrackMasterService.execute(workflowStage));
     }
     
     @RequestMapping(value="/workflowTrackMasters/action", method = RequestMethod.POST)
-    public void submitAction(@RequestBody WorkflowStage workflowStage) throws Exception {
-    	 workflowTrackMasterService.submitAction(workflowStage);
+    public void submitAction(@RequestBody WorkflowStageExpandedDto workflowStageExpandedDto) throws Exception {
+    	 workflowTrackMasterService.submitAction(workflowStageConvertor.convertWorkflowStageExpandedDtoToWorkflowStage(workflowStageExpandedDto));
     }
    
 }

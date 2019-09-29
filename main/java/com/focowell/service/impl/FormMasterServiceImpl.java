@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service;
 
 import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.dao.FormMasterDao;
+import com.focowell.dto.FormDesignPageDto;
 import com.focowell.model.FormDesign;
 import com.focowell.model.FormMaster;
 import com.focowell.model.FormRule;
-import com.focowell.model.dto.FormDesignDto;
 import com.focowell.service.FormMasterService;
 import com.focowell.service.FormRuleService;
 import com.focowell.service.VirtualTableFieldsService;
@@ -102,7 +102,7 @@ public class FormMasterServiceImpl implements FormMasterService {
 	
 	@Override
 	@Transactional
-	public boolean updateDesign(FormDesignDto formDesignDto)  {
+	public boolean updateDesign(FormDesignPageDto formDesignDto)  {
 		List<FormDesign> formDesigns=formDesignDto.getFormDesigns();
 		FormMaster form=formDesigns.stream().findFirst().get().getFormMaster();
 		

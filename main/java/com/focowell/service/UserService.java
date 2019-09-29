@@ -1,8 +1,8 @@
 package com.focowell.service;
 
 import com.focowell.config.error.AlreadyExistsException;
+import com.focowell.dto.UserDto;
 import com.focowell.model.User;
-import com.focowell.model.dto.UserDto;
 
 import java.util.List;
 

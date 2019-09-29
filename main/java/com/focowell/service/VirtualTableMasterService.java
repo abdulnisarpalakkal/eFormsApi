@@ -3,9 +3,9 @@ package com.focowell.service;
 import java.util.List;
 
 import com.focowell.config.error.AlreadyExistsException;
+import com.focowell.dto.VirtualTableFKConstraintRefDto;
+import com.focowell.dto.VirtualTableFieldsConstraintDto;
 import com.focowell.model.VirtualTableMaster;
-import com.focowell.model.dto.VirtualTableFKConstraintRefDto;
-import com.focowell.model.dto.VirtualTableFieldsConstraintDto;
 
 public interface VirtualTableMasterService {
 	    List<VirtualTableMaster> findAll();

@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -32,6 +33,7 @@ import com.focowell.model.FormDesign;
 import com.focowell.model.FormMaster;
 import com.focowell.model.User;
 import com.focowell.model.UserRoles;
+import com.focowell.model.VirtualRowRecord;
 import com.focowell.model.VirtualTableConstraintType;
 import com.focowell.model.VirtualTableConstraints;
 import com.focowell.model.VirtualTableField;
@@ -44,7 +46,6 @@ import com.focowell.model.WorkflowNodeType;
 import com.focowell.model.WorkflowStage;
 import com.focowell.model.WorkflowTrackDet;
 import com.focowell.model.WorkflowTrackMaster;
-import com.focowell.model.dto.VirtualRowRecordsDto;
 import com.focowell.service.FileService;
 import com.focowell.service.FormDesignService;
 import com.focowell.service.UserService;
@@ -191,8 +192,8 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 
 			final WorkflowLink firstLink=workflowLinkService.findStartNodeByWorkflow(workflow.getId());
 			if(firstLink!=null) {
-				Hibernate.initialize(firstLink.getSourceNode());
-				Hibernate.initialize(firstLink.getTargetNode());
+//				Hibernate.initialize(firstLink.getSourceNode());
+//				Hibernate.initialize(firstLink.getTargetNode());
 //				stage.setPrevTrack(null);
 				stage.setFormNode(firstLink.getTargetNode());
 				stage.setWorkflowMaster(workflow);
@@ -233,7 +234,7 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 					Hibernate.initialize(track.getWorkflowPrevTrackDetList());
 //					stage.setPrevTrack(track);
 					stage.setFormNode(link.getTargetNode());
-					
+					stage.setBreadCrumpList(getBreadCrumpTracks(track,stage.getWorkflowMaster().getWorkflowName()));
 					
 					if(formIsAccessable(stage.getFormNode().getFormMaster())){ //check whether this form is accessable for user
 						
@@ -244,6 +245,17 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 				
 			}
 		}
+	}
+	private List<String> getBreadCrumpTracks(WorkflowTrackDet track,String workflowName){
+		LinkedList<String> breadCrumps=new LinkedList<String>();
+		WorkflowTrackDet prevTrack=track.getWorkflowPrevTrack();
+		while(prevTrack!=null) {
+			breadCrumps.addFirst(prevTrack.getWorkflowActionNode().getLabel());
+			prevTrack=prevTrack.getWorkflowPrevTrack();
+		}
+		breadCrumps.addFirst(workflowName);
+		
+		return breadCrumps;
 	}
 	private List<WorkflowTrackDet> getPrevTracksForOpenStage(WorkflowTrackDet openTrack,List<WorkflowTrackDet> workflowTrackDetialsList) {	
 		List<WorkflowTrackDet> prevTracks=new ArrayList<>();
@@ -286,9 +298,13 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 		
 		WorkflowNode formNode=null;
 		WorkflowStage nextStage=null;
+		WorkflowMaster workflowMaster=workflowStage.getWorkflowMaster();
+		WorkflowTrackDet prevTrackDet=workflowStage.getWorkflowTrackDet();
+		if(prevTrackDet!=null && prevTrackDet.getId()!=0)
+			prevTrackDet=workflowTrackDetService.findById(prevTrackDet.getId());
 		
-		List<WorkflowLink> workflowLinks= workflowLinkService.findAllByWorkflow(workflowStage.getWorkflowMaster().getId()); //get all workflow links under this workflow
-		formNode=getNextFormNode(workflowStage.getWorkflowTrackDet(),workflowLinks); //get next available form
+		List<WorkflowLink> workflowLinks= workflowLinkService.findAllByWorkflow(workflowMaster.getId()); //get all workflow links under this workflow
+		formNode=getNextFormNode(prevTrackDet,workflowLinks); //get next available form
 		
 		
 		if(formNode!=null ) {
@@ -297,17 +313,20 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 				throw new AccessDeniedException("You dont have access privilage to this form");
 			Hibernate.initialize(formNode.getFormMaster().getVirtualTableMaster()); //lazy initialization of vrtual table
 			Hibernate.initialize(formNode.getFormMaster().getFormDesignList()); //lazy initialization of form design
-			boolean isWorkflowStarting=workflowStage.getWorkflowTrackDet()==null;
+
+			
+			boolean isWorkflowStarting=prevTrackDet==null;
 			if(!isWorkflowStarting ) {  //if it is not start form then fetch data that is submitted previously
+				
 				formNode.getFormMaster().setVirtualRowRecordsDto(
-						virtualTableRecordsService.findRowByTableAndPk(formNode.getFormMaster().getVirtualTableMaster().getId(),workflowStage.getWorkflowTrackDet().getWorkflowTrackMaster().getDataId()));
+						virtualTableRecordsService.findRowByTableAndPk(formNode.getFormMaster().getVirtualTableMaster().getId(),prevTrackDet.getWorkflowTrackMaster().getDataId()));
 				if(formNode.getFormMaster().getVirtualRowRecordsDto()==null) {
-					WorkflowTrackMaster trackMaster= findById(workflowStage.getWorkflowTrackDet().getWorkflowTrackMaster().getId());
-					workflowStage.getWorkflowTrackDet().setWorkflowTrackMaster(trackMaster);
+					WorkflowTrackMaster trackMaster= findById(prevTrackDet.getWorkflowTrackMaster().getId());
+					prevTrackDet.setWorkflowTrackMaster(trackMaster);
 					trackMaster.setCompleted(true);
-					workflowStage.getWorkflowTrackDet().setOpen(false);
-//					workflowTrackMasterDao.save(trackMaster);
-					workflowTrackDetService.save(workflowStage.getWorkflowTrackDet());
+					prevTrackDet.setOpen(false);
+
+					workflowTrackDetService.save(prevTrackDet);
 					throw new NotFoundException("This workflow closed forcily since it coudn't find corresponding virtual table record ");
 				}
 				else
@@ -324,8 +343,8 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 			nextStage=new WorkflowStage();  
 			nextStage.setFormNode(formNode);
 		    nextStage.setActionNodes(actionNodes);
-		    nextStage.setWorkflowTrackDet(workflowStage.getWorkflowTrackDet());
-		    nextStage.setWorkflowMaster(workflowStage.getWorkflowMaster());
+		    nextStage.setWorkflowTrackDet(prevTrackDet);
+		    nextStage.setWorkflowMaster(workflowMaster);
 //		    nextStage.setPrevTrack(workflowStage.getPrevTrack());
 			
 		}
@@ -410,10 +429,13 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 		WorkflowNode currentWorkflowNode=null;
 		WorkflowNode currentSourceNode=null;
 		WorkflowTrackDet prevTrack=WorkflowStage.getWorkflowTrackDet();
+		boolean isWorkflowStarting=true;
+		if(prevTrack!=null && prevTrack.getId()!=0) {
+			isWorkflowStarting=false;
+			prevTrack=workflowTrackDetService.findById(prevTrack.getId());
+		}
+			
 		
-		
-		
-		boolean isWorkflowStarting=WorkflowStage.getWorkflowTrackDet()==null;
 		boolean isNextNodeChildWorkflow=false;
 		currentFormNode=WorkflowStage.getFormNode();
 		currentSourceNode=WorkflowStage.getSelectedActionNode();
@@ -422,17 +444,18 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 		
 		//data saving from form and setting workflow track master and closing current stage if it is not starting of workflow
 		if(isWorkflowStarting) {
-			VirtualRowRecordsDto savedVirtualRowRecordsDto=virtualTableRecordsService.saveVirtualRecordsFromForm(currentFormNode.getFormMaster()); //Saving form data
+			VirtualRowRecord savedVirtualRowRecordsDto=virtualTableRecordsService.saveVirtualRecordsFromForm(currentFormNode.getFormMaster()); //Saving form data
 			pkValue=savedVirtualRowRecordsDto.getPkValue();
 			workflowTrackMaster=new WorkflowTrackMaster(WorkflowStage.getWorkflowMaster(),user,pkValue,new HashSet<WorkflowTrackDet>());
 			
 		}
 		else {
-			workflowTrackMaster=findById(WorkflowStage.getWorkflowTrackDet().getWorkflowTrackMaster().getId()); //find track master if it is not first stage
+			
+			workflowTrackMaster=findById(prevTrack.getWorkflowTrackMaster().getId()); //find track master if it is not first stage
 			workflowTrackMaster.getWorkflowTrackDetList().size(); //initialize existing track records
-			VirtualRowRecordsDto savedVirtualRowRecordsDto=virtualTableRecordsService.updateVirtualRecordsFromForm(currentFormNode.getFormMaster(),workflowTrackMaster.getDataId()); //Updating form data
+			VirtualRowRecord savedVirtualRowRecordsDto=virtualTableRecordsService.updateVirtualRecordsFromForm(currentFormNode.getFormMaster(),workflowTrackMaster.getDataId()); //Updating form data
 			pkValue=savedVirtualRowRecordsDto.getPkValue();
-			closeCurrentStage(WorkflowStage.getWorkflowTrackDet()); //closing the current stage
+			closeCurrentStage(prevTrack); //closing the current stage
 			
 		}
 		//end data saving from form and setting workflow track master and closing current stage if it is not starting of workflow
@@ -535,9 +558,9 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 				
 				records.add(virtualTableRecord);
 			}
-			VirtualRowRecordsDto childVirtualRowRecordsDto=new VirtualRowRecordsDto(records,0,childTable);
+			VirtualRowRecord childVirtualRowRecordsDto=new VirtualRowRecord(records,0,childTable);
 			
-			VirtualRowRecordsDto savedVirtualRowRecordsDto=virtualTableRecordsService.saveOneRowRecordAfterCheckPkValue(childVirtualRowRecordsDto); //inserting one record child workflow
+			VirtualRowRecord savedVirtualRowRecordsDto=virtualTableRecordsService.saveOneRowRecordAfterCheckPkValue(childVirtualRowRecordsDto); //inserting one record child workflow
 			pkValue=savedVirtualRowRecordsDto.getPkValue();
 		}
 		
@@ -629,6 +652,7 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 	
 	@Override
 	public boolean formIsAccessable(FormMaster form) {
+		
 		//check whether this form is accessable for user
 		if(form==null)
 			return false;
@@ -642,6 +666,7 @@ public class WorkflowTrackMasterServiceImpl implements WorkflowTrackMasterServic
 			}
 		}
 		return false;
+		
 	}
 	
 

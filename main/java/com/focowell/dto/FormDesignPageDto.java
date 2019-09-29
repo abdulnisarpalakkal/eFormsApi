@@ -1,4 +1,4 @@
-package com.focowell.model.dto;
+package com.focowell.dto;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ import com.focowell.model.FormDesign;
 import com.focowell.model.FormRule;
 import com.focowell.model.FormRuleType;
 
-public class FormDesignDto {
+public class FormDesignPageDto {
 	List<FormDesign> formDesigns;
 	List<FormRule> formRules;
 	List<FormRuleType> formRuleTypes;

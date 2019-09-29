@@ -19,18 +19,18 @@ public class FormRuleParameterValue {
 	@Id
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="formRuleParamValueSeq")
 	@SequenceGenerator(name="formRuleParamValueSeq",sequenceName="form_rule_param_value_seq")
-	public long id;
+	private long id;
 	
 	@JsonIgnoreProperties(value="formRuleParameterValues",allowSetters=true)
 	@ManyToOne(fetch=FetchType.EAGER)
-	public FormRule formRule;
+	private FormRule formRule;
 	
 	@JsonIgnoreProperties(value="formRuleParameterValues",allowSetters=true)
 	@ManyToOne(fetch=FetchType.EAGER)
-	public FormRuleTypeParameter formRuleTypeParameter;
+	private FormRuleTypeParameter formRuleTypeParameter;
 	
 	@Column(name="form_rule_parameter_value")
-	public String formRuleParameterValue;
+	private String formRuleParameterValue;
 	
 	public long getId() {
 		return id;

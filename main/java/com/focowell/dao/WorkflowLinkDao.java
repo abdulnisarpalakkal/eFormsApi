@@ -17,7 +17,9 @@ import com.focowell.model.WorkflowNodeType;
 
 @Repository
 public interface WorkflowLinkDao extends CrudRepository<WorkflowLink, Long> {
-	@Query("SELECT v FROM WorkflowLink v left join fetch v.sourceNode s left join fetch v.targetNode t  left join fetch v.workflowMaster w where w.id=:workflowId ")
+	@Query("SELECT v FROM WorkflowLink v left join fetch v.sourceNode s left join fetch v.targetNode t "
+			+ " left join fetch t.formMaster form left join fetch form.virtualTableMaster  "
+			+ "left join fetch v.workflowMaster w where w.id=:workflowId ")
 	Iterable<WorkflowLink> findAllByWorkflowIdJPQL(@Param("workflowId") long workflowId);
 	
 	@Query("SELECT v FROM WorkflowLink v left join fetch v.sourceNode s left join fetch v.targetNode t  left join fetch v.workflowMaster w where w.id=:workflowId and s.nodeType=:startType ")

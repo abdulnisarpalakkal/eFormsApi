@@ -32,6 +32,7 @@ public class WorkflowStage implements Serializable {
 	private WorkflowNode selectedActionNode;
 //	private WorkflowTrackDet prevTrack;
 	private List<WorkflowTrackDet> prevTracks;
+	private List<String> breadCrumpList;
 	
 	
 	public long getId() {
@@ -86,6 +87,12 @@ public class WorkflowStage implements Serializable {
 	}
 	public void setPrevTracks(List<WorkflowTrackDet> prevTracks) {
 		this.prevTracks = prevTracks;
+	}
+	public List<String> getBreadCrumpList() {
+		return breadCrumpList;
+	}
+	public void setBreadCrumpList(List<String> breadCrumpList) {
+		this.breadCrumpList = breadCrumpList;
 	}
 
 	

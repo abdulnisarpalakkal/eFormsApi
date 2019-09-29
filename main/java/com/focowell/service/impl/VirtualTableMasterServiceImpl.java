@@ -12,13 +12,13 @@ import org.springframework.stereotype.Service;
 
 import com.focowell.config.error.AlreadyExistsException;
 import com.focowell.dao.VirtualTableMasterDao;
+import com.focowell.dto.VirtualTableFKConstraintRefDto;
+import com.focowell.dto.VirtualTableFieldsConstraintDto;
 import com.focowell.model.VirtualTableConstraintType;
 import com.focowell.model.VirtualTableConstraints;
 import com.focowell.model.VirtualTableField;
 import com.focowell.model.VirtualTableMaster;
 import com.focowell.model.VirtualTableSequence;
-import com.focowell.model.dto.VirtualTableFKConstraintRefDto;
-import com.focowell.model.dto.VirtualTableFieldsConstraintDto;
 import com.focowell.service.VirtualTableConstraintsService;
 import com.focowell.service.VirtualTableFieldsService;
 import com.focowell.service.VirtualTableMasterService;

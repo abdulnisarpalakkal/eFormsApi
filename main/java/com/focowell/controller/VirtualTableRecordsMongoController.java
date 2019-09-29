@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.focowell.model.dto.VirtualRowRecordsDto;
+import com.focowell.model.VirtualRowRecord;
 import com.focowell.service.VirtualTableRecordsMongoService;
 
 @RestController
@@ -18,7 +18,7 @@ public class VirtualTableRecordsMongoController {
     private VirtualTableRecordsMongoService virtualTableRecordsMongoService;
 	
 	 @RequestMapping(value="/virtualRowRecords", method = RequestMethod.GET)
-	    public List<VirtualRowRecordsDto> list(){
+	    public List<VirtualRowRecord> list(){
 	        return virtualTableRecordsMongoService.findAll();
 	    }
 }

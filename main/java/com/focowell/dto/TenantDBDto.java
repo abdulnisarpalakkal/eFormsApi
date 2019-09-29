@@ -1,4 +1,4 @@
-package com.focowell.model.dto;
+package com.focowell.dto;
 
 public class TenantDBDto {
 	private long id;

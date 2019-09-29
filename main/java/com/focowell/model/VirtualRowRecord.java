@@ -1,18 +1,15 @@
-package com.focowell.model.dto;
+package com.focowell.model;
 
 import java.io.Serializable;
 import java.util.List;
 
-import com.focowell.model.VirtualTableMaster;
-import com.focowell.model.VirtualTableRecords;
 
 
-
-public class VirtualRowRecordsDto implements Serializable {
-	public VirtualRowRecordsDto() {
+public class VirtualRowRecord implements Serializable {
+	public VirtualRowRecord() {
 		
 	}
-	public VirtualRowRecordsDto(List<VirtualTableRecords> records,long pkValue,VirtualTableMaster virtualTableMaster) {
+	public VirtualRowRecord(List<VirtualTableRecords> records,long pkValue,VirtualTableMaster virtualTableMaster) {
 		this.records=records;
 		this.pkValue=pkValue;
 		this.virtualTableMaster=virtualTableMaster;
